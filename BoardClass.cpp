@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "BoardClass.h"
 #include <iostream>
-#include <string>
 
 using namespace std;
 
@@ -53,12 +52,25 @@ Board& Board::operator=(const Board& other)
 }
 
 
+/*In the game, indexing starts at 1*/
 char Board::operator()(int row, int column) const
 {
+	row -= 1;
+	column -= 1;
 	if (-1 < row && row < rows_ && -1 < column && column < columns_)
 	{
 		return data_[columns_*row + column];
 	}
 	throw std::out_of_range("Trying to access invalid index in the board.");
+}
+
+int Board::getNumOfRows() const
+{
+	return rows_;
+}
+
+int Board::getNumOfCols() const
+{
+	return columns_;
 }
 

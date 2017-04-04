@@ -33,7 +33,7 @@
     <ClInclude Include="GameFromFileManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BattleshipPlayerAlgoFromFile.h">
+    <ClInclude Include="BattleshipPlayerFromFile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -50,7 +50,7 @@
     <ClCompile Include="GameFromFileManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BattleshipPlayerAlgoFromFile.cpp">
+    <ClCompile Include="BattleshipPlayerFromFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

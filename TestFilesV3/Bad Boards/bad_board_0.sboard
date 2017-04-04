@@ -1,0 +1,13 @@
+B        b
+          
+ B     b  
+          
+   B b  p 
+        p 
+   b    p 
+        p 
+ b     B  
+          
+# Expected print:
+Wrong size or shape for ship p for player B
+Too few ships for player A

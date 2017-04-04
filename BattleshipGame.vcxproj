@@ -145,7 +145,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BattleshipPlayerAlgoFromFile.h" />
+    <ClInclude Include="BattleshipPlayerFromFile.h" />
     <ClInclude Include="BoardClass.h" />
     <ClInclude Include="GameFromFileManager.h" />
     <ClInclude Include="IBattleshipGameAlgo.h" />
@@ -154,7 +154,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BattleshipGame.cpp" />
-    <ClCompile Include="BattleshipPlayerAlgoFromFile.cpp" />
+    <ClCompile Include="BattleshipPlayerFromFile.cpp" />
     <ClCompile Include="BoardClass.cpp" />
     <ClCompile Include="GameFromFileManager.cpp" />
     <ClCompile Include="stdafx.cpp">

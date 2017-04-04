@@ -9,10 +9,12 @@ using namespace std;
 class BattleshipPlayerFromFile : IBattleshipGameAlgo
 {
 public:
-	BattleshipPlayerFromFile();
+	BattleshipPlayerFromFile(int);
 
 	/*This ctor gets a path to attack file*/
-	BattleshipPlayerFromFile(string);
+	BattleshipPlayerFromFile(int, string);
+
+	void loadAttacksFromFile();
 
 	/* This function is my API to get my board */
 	void setBoard(const char** board, int numRows, int numCols) override;
@@ -24,4 +26,6 @@ public:
 private:
 	Board *pBrd;
 	std::queue<std::pair<int,int>> *attacksQueue;
+	int Id;
+	string pathToAttacksFile;
 };

@@ -1,0 +1,17 @@
+          
+ DDDD DDDD
+     DDDD 
+d D d     
+d D d  zkj
+d D d     
+d D d     
+          
+ DDDD   mm
+      dddd
+
+#Expected print:
+Wrong size or shape for ship D for player A
+Wrong size or shape for ship m for player B
+Too few ships for player A
+Too few ships for player B
+Adjacent Ships on Board

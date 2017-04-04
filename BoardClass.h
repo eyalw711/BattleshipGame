@@ -12,6 +12,8 @@ public:
 	Board& operator=(const Board&);
 	char operator()(int, int) const;
 
+	int getNumOfRows() const;
+	int getNumOfCols() const;
 	~Board();
 private:
 	int rows_;
