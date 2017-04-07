@@ -13,7 +13,7 @@ BattleshipPlayerFromFile::BattleshipPlayerFromFile(char Id, string pathToAttackF
 {
 }
 
-void BattleshipPlayerFromFile::loadAttacksFromFile()
+void BattleshipPlayerFromFile::loadAttacksFromFile() //TODO: void? don't we want some signal if it fails? 
 {
 	if (pBrd == nullptr)
 		return;
@@ -105,10 +105,10 @@ void BattleshipPlayerFromFile::loadAttacksFromFile()
 			catch (logic_error le)
 			{
 				cout << "Expected nothing after column!" << endl;
-				continue;
+				continue; //why continue???
 			}
 			//--stage8: check coords validity
-			//TODO: do it
+			//TODO: do it //we should still do it???
 			if (row < 1 || row > pBrd->getNumOfRows() || col < 1 ||  col > pBrd->getNumOfCols())
 			{
 				cout << "Coordinates are invalid to board!" << endl;
@@ -158,7 +158,7 @@ char BattleshipPlayerFromFile::getId() const
 	return Id;
 }
 
-/* This function is my API to get my board.
+/* This function is my API to get my board. // TODO: get or set???
  * Here I dont read files, only
  */
 void BattleshipPlayerFromFile::setBoard(const char ** board, int numRows, int numCols)
@@ -171,7 +171,7 @@ void BattleshipPlayerFromFile::setBoard(const char ** board, int numRows, int nu
 		memcpy(buff + numCols * i, board[i], numCols); //copies one row into a long buffer
 	}
 
-	std::string content(reinterpret_cast<char*>(buff), numRows * numCols);
+	std::string content(reinterpret_cast<char*>(buff), numRows * numCols); //TODO: why reinterpret_cast???
 	pBrd = new Board(content, numRows, numCols);
 
 	// after we have the board we can detect wrong attacks (invalid coords)

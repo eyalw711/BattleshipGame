@@ -30,7 +30,7 @@ bool GameFromFileManager::isGameOn() const
 				foundLowerCase = true;
 		}
 	}
-	if ((foundLowerCase && !foundUpperCase) || (!foundLowerCase && foundUpperCase))
+	if ((foundLowerCase && !foundUpperCase) || (!foundLowerCase && foundUpperCase)) //TODO: why this condition?
 		return true;
 
 	return false;
@@ -81,7 +81,7 @@ void GameFromFileManager::mainLoop()
 			}
 		} while (true);
 
-		//end of turn - player goes to end of line
+		//end of turn - player goes to end of queue 
 		playersAndScores.push(currPlayerScorePair);
 	}
 }

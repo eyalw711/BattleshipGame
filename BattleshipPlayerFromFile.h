@@ -13,7 +13,7 @@ public:
 	/*This ctor gets a path to attack file*/
 	BattleshipPlayerFromFile(char Id, string PathTOAttacksFile);
 
-	~BattleshipPlayerFromFile() override;
+	~BattleshipPlayerFromFile() override; //TODO: why override?
 
 	void loadAttacksFromFile();
 
