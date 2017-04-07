@@ -64,6 +64,33 @@ char Board::operator()(int row, int column) const
 	throw std::out_of_range("Trying to access invalid index in the board.");
 }
 
+void Board::setSlot(int row, int col, char marineObject)
+{
+	if (marineObject == Board::SEA         ||
+		marineObject == Board::A_BOAT	   ||
+		marineObject == Board::A_SATIL	   ||
+		marineObject == Board::A_SUBMARINE ||
+		marineObject == Board::A_DESTROYER ||
+		marineObject == Board::B_BOAT	   ||
+		marineObject == Board::B_SATIL	   ||
+		marineObject == Board::B_SUBMARINE ||
+		marineObject == Board::B_DESTROYER)
+	{
+		if (row > -1 && col > -1 && row < rows_ && col <= columns_)
+		{
+			data_[row*columns_ + col] = marineObject;
+		}
+		else
+		{
+			throw std::out_of_range("Indices out of range of the board!");
+		}
+	}
+	else
+	{
+		throw std::logic_error("Invalid Marine Object!");
+	}
+}
+
 int Board::getNumOfRows() const
 {
 	return rows_;

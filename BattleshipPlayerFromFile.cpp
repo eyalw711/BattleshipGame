@@ -7,13 +7,8 @@
 
 using namespace  std;
 
-/*Doesn't do anything*/
-BattleshipPlayerFromFile::BattleshipPlayerFromFile(int Id) : pBrd(nullptr), attacksQueue(new std::queue<std::pair<int,int>>), Id(Id)
-{
-}
-
 /* initializes the attacksQueue */
-BattleshipPlayerFromFile::BattleshipPlayerFromFile(int Id, string pathToAttackFile) : 
+BattleshipPlayerFromFile::BattleshipPlayerFromFile(char Id, string pathToAttackFile) : 
 	pBrd(nullptr), attacksQueue(new std::queue<std::pair<int, int>>), Id(Id), pathToAttacksFile(pathToAttackFile)
 {
 }
@@ -154,7 +149,13 @@ std::pair<int, int> BattleshipPlayerFromFile::attack()
 
 void BattleshipPlayerFromFile::notifyOnAttackResult(int player, int row, int col, AttackResult result)
 {
-	//TODO
+	//thank you but I am stupid and don't really care about the results of the attack :)
+	return;
+}
+
+char BattleshipPlayerFromFile::getId() const
+{
+	return Id;
 }
 
 /* This function is my API to get my board.
@@ -164,7 +165,7 @@ void BattleshipPlayerFromFile::setBoard(const char ** board, int numRows, int nu
 {
 	//-- Read the board content:
 
-	char *buff = new char(numRows * numCols);
+	char *buff = new char[numRows * numCols];
 	for (auto i = 0; i < numRows; i++) //TODO: is board a pointer to an array of rows? array of columns?
 	{
 		memcpy(buff + numCols * i, board[i], numCols); //copies one row into a long buffer

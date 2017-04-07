@@ -6,26 +6,30 @@
 using namespace std;
 
 /*This is a player*/
-class BattleshipPlayerFromFile : IBattleshipGameAlgo
+class BattleshipPlayerFromFile : public IBattleshipGameAlgo
 {
 public:
-	BattleshipPlayerFromFile(int);
 
 	/*This ctor gets a path to attack file*/
-	BattleshipPlayerFromFile(int, string);
+	BattleshipPlayerFromFile(char Id, string PathTOAttacksFile);
+
+	~BattleshipPlayerFromFile() override;
 
 	void loadAttacksFromFile();
 
 	/* This function is my API to get my board */
 	void setBoard(const char** board, int numRows, int numCols) override;
-
-	~BattleshipPlayerFromFile() override;
 	
-	std::pair<int, int> attack() override; // ask player for his move
+	/* My API to ask my attack */
+	std::pair<int, int> attack() override; 
+	
+	/* My API to receive attack results */
 	void notifyOnAttackResult(int player, int row, int col, AttackResult result) override; // notify on last move result
+
+	char getId() const;
 private:
 	Board *pBrd;
 	std::queue<std::pair<int,int>> *attacksQueue;
-	int Id;
+	char Id;
 	string pathToAttacksFile;
 };
