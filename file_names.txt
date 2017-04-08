@@ -1,0 +1,3 @@
+clean_movesA.attack-a
+clean_movesB.attack-b
+good_board_0.sboard

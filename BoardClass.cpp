@@ -1,11 +1,51 @@
 #include "stdafx.h"
 #include "BoardClass.h"
 #include <iostream>
+#include <fstream>
+#include <sstream>
+
 
 using namespace std;
 
+std::istream& safeGetline(std::istream& is, std::string& t)
+{
+	t.clear();
+
+	// The characters in the stream are read one-by-one using a std::streambuf.
+	// That is faster than reading them one-by-one using the std::istream.
+	// Code that uses streambuf this way must be guarded by a sentry object.
+	// The sentry object performs various tasks,
+	// such as thread synchronization and updating the stream state.
+
+	std::istream::sentry se(is, true);
+	std::streambuf* sb = is.rdbuf();
+
+	for (;;) {
+		int c = sb->sbumpc();
+		switch (c) {
+		case '\n':
+			return is;
+		case '\r':
+			if (sb->sgetc() == '\n')
+				sb->sbumpc();
+			return is;
+		case EOF:
+			// Also handle the case when the last line has no line ending
+			if (t.empty())
+				is.setstate(std::ios::eofbit);
+			return is;
+		default:
+			t += (char)c;
+		}
+	}
+}
 
 //non-default ctor
+Board::Board(int rows, int columns) : rows_(rows), columns_(columns), data_(new char[rows * columns])
+{
+	cout << "non-default Board ctor activated" << endl;
+	memset(data_, ' ', rows*columns);
+}
 Board::Board(string data, int rows, int columns) : rows_(rows), columns_(columns), data_(new char[rows * columns])
 {
 	/*
@@ -20,6 +60,31 @@ Board::Board(string data, int rows, int columns) : rows_(rows), columns_(columns
 	memcpy(data_, data.c_str(), copyAmount);
 }
 
+void Board::SetBoardFromFile(const char* path)
+{
+	std::ifstream infile(path);
+	std::string line;
+	
+	int row = 0;
+	while (getline(infile, line) && row < rows_)
+	{
+		std::stringstream ss(line);
+		int column = 0;
+		while (column < line.size() && column < columns_)
+		{
+			if (isLegalBoardElement(ss.peek()))
+			{
+				data_[columns_*row + column] = ss.peek();
+				ss.ignore();
+			}
+			else
+				ss.ignore();
+			column++;
+		}
+		row++;
+	}
+}
+
 //dtor
 Board::~Board()
 {
@@ -28,10 +93,11 @@ Board::~Board()
 }
 
 //copy ctor
-Board::Board(const Board &brd) : rows_(brd.rows_), columns_(brd.columns_), data_(new char[brd.rows_ * brd.columns_])
+Board::Board(const Board &brd) : rows_(brd.rows_), columns_(brd.columns_), data_(new char[brd.rows_ * brd.columns_ + 1])
 {
 	cout << "copy Board ctor activated" << endl;
 	memcpy(data_, brd.data_, brd.rows_ * brd.columns_);
+	data_[brd.rows_ * brd.columns_ + 1] = '\0';
 }
 
 Board& Board::operator=(const Board& other)
@@ -62,6 +128,57 @@ char Board::operator()(int row, int column) const
 		return data_[columns_*row + column];
 	}
 	throw std::out_of_range("Trying to access invalid index in the board.");
+}
+
+bool Board::isLegalBoardElement(char marineObject)
+{
+	if (marineObject == Board::SEA ||
+		marineObject == Board::A_BOAT ||
+		marineObject == Board::A_SATIL ||
+		marineObject == Board::A_SUBMARINE ||
+		marineObject == Board::A_DESTROYER ||
+		marineObject == Board::B_BOAT ||
+		marineObject == Board::B_SATIL ||
+		marineObject == Board::B_SUBMARINE ||
+		marineObject == Board::B_DESTROYER)
+	{
+		return true;
+	}
+	return false;
+}
+
+//user should be 'A' or 'B'
+bool Board::isUserShip(char user, char marineObject)
+{
+	if (user == 'A')
+		return isAShip(marineObject);
+	else if (user == 'B')
+		return isBShip(marineObject);
+	else
+		throw std::logic_error("Invalid User");
+}
+bool Board::isAShip(char marineObject)
+{
+	if (marineObject == Board::A_BOAT ||
+		marineObject == Board::A_SATIL ||
+		marineObject == Board::A_SUBMARINE ||
+		marineObject == Board::A_DESTROYER)
+	{
+		return true;
+	}
+	return false;
+}
+
+bool Board::isBShip(char marineObject)
+{
+	if (marineObject == Board::B_BOAT ||
+		marineObject == Board::B_SATIL ||
+		marineObject == Board::B_SUBMARINE ||
+		marineObject == Board::B_DESTROYER)
+	{
+		return true;
+	}
+	return false;
 }
 
 void Board::setSlot(int row, int col, char marineObject)
@@ -99,5 +216,42 @@ int Board::getNumOfRows() const
 int Board::getNumOfCols() const
 {
 	return columns_;
+}
+
+//user should be 'A' or 'B'
+void Board::findShips(char user)
+{
+	/*char brd[10*10]; // TODO: consider this
+	memcpy(brd, data_, 100); // TODO: consider this
+	vector<pair<int, int>> coords;
+	for(int i=1 ; i < rows_ ; i++)
+	{
+		for(int j =1 ; j < columns_ ; j++)
+		{
+			if (isUserShip(user, (*this)(i,j)))
+			{
+				coords
+			}
+		}
+	}*/
+}
+
+std::ostream& operator<<(std::ostream &strm, const Board &brd) {
+	// making columns
+	strm << "    ";
+	for(int i = 1 ; i <= brd.columns_ ; i++)
+		strm << i << " ";
+	strm << endl;
+
+	for (int i = 1; i <= brd.rows_; i++)
+	{
+		strm << i << "   ";
+		for(int j = 1; j <= brd.columns_; j++)
+		{
+			strm << brd(i,j) << " ";
+		}
+		strm << endl;
+	}
+	return strm;
 }
 
