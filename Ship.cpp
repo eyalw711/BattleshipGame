@@ -6,7 +6,8 @@ Ship::Ship()
 {
 	
 }
-Ship::Ship(ship_type type, pair<int, int> start, pair<int, int> end) : type(type), start(start), end(end)
+Ship::Ship(ship_type type, pair<int, int> start, pair<int, int> end) : type(type), start(start), end(end),
+			coordinates(vector<pair<pair<int, int>, bool>>())
 {
 	// find size of ship
 	switch (type)
@@ -35,7 +36,7 @@ Ship::Ship(ship_type type, pair<int, int> start, pair<int, int> end) : type(type
 	{
 		for (int j = start.second; j < end.second; j++)
 		{
-			coordinates[index] = { i, j };
+			coordinates.push_back(make_pair(make_pair(i, j), false));
 			index++;
 		}
 	}

@@ -158,15 +158,13 @@ char BattleshipPlayerFromFile::getId() const
 	return Id;
 }
 
-/* This function is my API to get my board. // TODO: get or set???
- * Here I dont read files, only
- */
+/* This function is my API to acquire my board. */
 void BattleshipPlayerFromFile::setBoard(const char ** board, int numRows, int numCols)
 {
 	//-- Read the board content:
 
 	char *buff = new char[numRows * numCols];
-	for (auto i = 0; i < numRows; i++) //TODO: is board a pointer to an array of rows? array of columns?
+	for (auto i = 0; i < numRows; i++) // board a pointer to an array of rows
 	{
 		memcpy(buff + numCols * i, board[i], numCols); //copies one row into a long buffer
 	}
@@ -178,5 +176,4 @@ void BattleshipPlayerFromFile::setBoard(const char ** board, int numRows, int nu
 	// so this is the correct time to call.
 	loadAttacksFromFile();
 }
-
 

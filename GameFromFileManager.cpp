@@ -15,6 +15,7 @@ GameFromFileManager::GameFromFileManager() : numOfPlayers(2) , brd(nullptr), att
 	}
 }
 
+//invalid
 bool GameFromFileManager::isGameOn() const
 {
 	bool foundLowerCase = false, foundUpperCase = true;
@@ -104,4 +105,23 @@ bool GameFromFileManager::selfHit(BattleshipPlayerFromFile& player, std::pair<in
 	}
 	return false;
 }
+
+//user should be 'A' or 'B'
+void GameFromFileManager::findShips(char user)
+{
+	/*Board copiedBoard(*brd);
+	vector<Ship> *ships = new vector<Ship>;
+	vector<pair<int, int>> coords;
+	for (int i = 1; i < copiedBoard.getNumOfRows(); i++)
+	{
+		for (int j = 1; j < copiedBoard.getNumOfCols(); j++)
+		{
+			if (Board::isUserShip(user, copiedBoard(i, j)))
+			{
+				coords
+			}
+		}
+	}*/
+}
+
 

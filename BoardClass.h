@@ -33,13 +33,16 @@ public:
 
 	int getNumOfRows() const;
 	int getNumOfCols() const;
-	void findShips(char user);
+
 	friend std::ostream& operator<<(std::ostream &strm, const Board &brd);
 	~Board();
 private:
 	int rows_;
 	int columns_;
 	char *data_;
-	Ship a_ships[5];
-	Ship b_ships[5];
+
+
+
+
+
 };

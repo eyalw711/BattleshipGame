@@ -1,5 +1,6 @@
 #pragma once
 #include <utility>
+#include <vector>
 
 
 using namespace std;
@@ -20,7 +21,8 @@ private:
 	int size;
 	pair<int, int> start;
 	pair<int, int> end;
-	pair<int, int> coordinates[4] = {{0,0}};
+	vector<pair<pair<int, int>,bool>> coordinates; // bool is "isHit"
+	//pair<int, int> coordinates[4] = {{0,0}};
 	bool hit[4] = {false};
 };
 

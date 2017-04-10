@@ -93,11 +93,10 @@ Board::~Board()
 }
 
 //copy ctor
-Board::Board(const Board &brd) : rows_(brd.rows_), columns_(brd.columns_), data_(new char[brd.rows_ * brd.columns_ + 1])
+Board::Board(const Board &brd) : rows_(brd.rows_), columns_(brd.columns_), data_(new char[brd.rows_ * brd.columns_])
 {
 	cout << "copy Board ctor activated" << endl;
 	memcpy(data_, brd.data_, brd.rows_ * brd.columns_);
-	data_[brd.rows_ * brd.columns_ + 1] = '\0';
 }
 
 Board& Board::operator=(const Board& other)
@@ -218,23 +217,6 @@ int Board::getNumOfCols() const
 	return columns_;
 }
 
-//user should be 'A' or 'B'
-void Board::findShips(char user)
-{
-	/*char brd[10*10]; // TODO: consider this
-	memcpy(brd, data_, 100); // TODO: consider this
-	vector<pair<int, int>> coords;
-	for(int i=1 ; i < rows_ ; i++)
-	{
-		for(int j =1 ; j < columns_ ; j++)
-		{
-			if (isUserShip(user, (*this)(i,j)))
-			{
-				coords
-			}
-		}
-	}*/
-}
 
 std::ostream& operator<<(std::ostream &strm, const Board &brd) {
 	// making columns
