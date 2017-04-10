@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <iso646.h>
 
 
 using namespace std;
@@ -192,8 +193,10 @@ void Board::setSlot(int row, int col, char marineObject)
 		marineObject == Board::B_SUBMARINE ||
 		marineObject == Board::B_DESTROYER)
 	{
-		if (row > -1 && col > -1 && row < rows_ && col <= columns_)
+		if (isInBoard(row,col))
 		{
+			row -= 1;
+			col -= 1;
 			data_[row*columns_ + col] = marineObject;
 		}
 		else
@@ -215,6 +218,13 @@ int Board::getNumOfRows() const
 int Board::getNumOfCols() const
 {
 	return columns_;
+}
+
+bool Board::isInBoard(int row, int col)
+{
+	if (row >=1 and row <= rows_ and col >= 1 and col <= columns_)
+		return true;
+	return false;
 }
 
 
