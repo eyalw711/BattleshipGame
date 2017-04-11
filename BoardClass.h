@@ -24,6 +24,7 @@ public:
 	Board(const Board&);
 	Board& operator=(const Board&);
 	char operator()(int, int) const;
+	bool isInBoard(int row, int col);
 	static bool isLegalBoardElement(char c);
 	static bool isUserShip(char user, char marineObject);
 	static bool isAShip(char marineObject);

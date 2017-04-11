@@ -9,6 +9,7 @@
 #include <sstream>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include "GameFromFileManager.h"
 
 bool is_valid_dir_path(char *pathname)
 {
@@ -86,14 +87,25 @@ int main(int argc, char *argv[])
 		// print board //TODO: delete it
 		cout << brd << endl;
 
-		// TODO: check board validity
+		// create instance of Game Manager		
+		GameFromFileManager manager(&brd);
+		// printing coordinates of ships:
+		//manager.printShipsCoordinates('A');
+		//manager.printShipsCoordinates('B');
+
+		// check board validity
+		if (!manager.isValidBoard())
+			return -1;
+		else
+			cout << "*** board is valid ***" << endl; // TODO: delete it
+		
 	}
 	else
 		return -1;
 
 
-	BattleshipPlayerFromFile playerA = BattleshipPlayerFromFile(0, string("TestFilesV3\\moves\\dirty_ilegal_movesA.attack-a")); //clean_movesA.attack-a"));
-	playerA.setBoard(segmentationFault, 10, 10);
+	//BattleshipPlayerFromFile playerA = BattleshipPlayerFromFile(0, string("TestFilesV3\\moves\\dirty_ilegal_movesA.attack-a")); //clean_movesA.attack-a"));
+	//playerA.setBoard(segmentationFault, 10, 10);
 	return 0;
 }
 
