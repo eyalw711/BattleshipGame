@@ -1,8 +1,9 @@
-﻿  BoardClass.cpp
+﻿  stdafx.cpp
+  Ship.cpp
+  GameFromFileManager.cpp
+  BoardClass.cpp
   BattleshipPlayerFromFile.cpp
-  Generating Code...
-  Compiling...
   BattleshipGame.cpp
   Generating Code...
-  BattleshipGame.vcxproj -> C:\Users\ewaserma\Documents\Univ\semester 8\AdvancedProgramming\BattleshipGame\Debug\BattleshipGame.exe
-  BattleshipGame.vcxproj -> C:\Users\ewaserma\Documents\Univ\semester 8\AdvancedProgramming\BattleshipGame\Debug\BattleshipGame.pdb (Full PDB)
+  BattleshipGame.vcxproj -> C:\GIT\BattleshipGame\Debug\BattleshipGame.exe
+  BattleshipGame.vcxproj -> C:\GIT\BattleshipGame\Debug\BattleshipGame.pdb (Full PDB)

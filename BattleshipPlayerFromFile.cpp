@@ -26,7 +26,7 @@ bool BattleshipPlayerFromFile::loadAttacksFromFile()
 	if (attacksFile.is_open())
 	{
 		//read attacks
-		while (getline(attacksFile, line))
+		while (safeGetline(attacksFile, line))
 		{
 			int row, col;
 			char c;
@@ -34,7 +34,7 @@ bool BattleshipPlayerFromFile::loadAttacksFromFile()
 			//--stage0: ignore empty lines
 			if (line.empty())
 			{
-				cout << "Invalid empty row!" << endl;
+				DEBUG("Invalid empty row!");
 				continue;
 			}
 
@@ -47,7 +47,7 @@ bool BattleshipPlayerFromFile::loadAttacksFromFile()
 				ss >> row;
 			else
 			{
-				cout << "Expected a number as row!" << endl;
+				DEBUG("Expected a number as row!");
 				continue;
 			}
 
@@ -64,12 +64,12 @@ bool BattleshipPlayerFromFile::loadAttacksFromFile()
 				}
 				catch (exception e)
 				{
-					cout << e.what() << endl;
+					DEBUG(e.what());
 				}
 			}
 			else
 			{
-				cout << "Expected a comma after row!" << endl;
+				DEBUG("Expected a comma after row!");
 				continue;
 			}
 
@@ -82,7 +82,7 @@ bool BattleshipPlayerFromFile::loadAttacksFromFile()
 				}
 				catch (exception e)
 				{
-					cout << e.what() << endl;
+					DEBUG(e.what());
 				}
 			}
 
@@ -91,7 +91,7 @@ bool BattleshipPlayerFromFile::loadAttacksFromFile()
 				ss >> col;
 			else
 			{
-				cout << "Expected a number as column!" << endl;
+				DEBUG("Expected a number as column!");
 				continue;
 			}
 
@@ -106,25 +106,25 @@ bool BattleshipPlayerFromFile::loadAttacksFromFile()
 			}
 			catch (logic_error le)
 			{
-				cout << "Expected nothing after column!" << endl;
+				DEBUG("Expected nothing after column!");
 				continue; //why continue???
 			}
 			//--stage8: check coords validity
 			if (row < 1 || row > pBrd->getNumOfRows() || col < 1 ||  col > pBrd->getNumOfCols())
 			{
-				cout << "Coordinates are invalid to board!" << endl;
+				DEBUG("Coordinates are invalid to board!");
 				continue;
 			}
 			//-- success
 			//queue attacks into attacksQueue
 			attacksQueue->push(std::pair<int, int>(row, col));
-			cout << "Entered attack " << row << "," << col << endl;
+			DEBUG("Entered attack " << row << "," << col);
 		}
 		attacksFile.close();
 	}
 	else
 	{
-		cout << "Unable to open file" << endl;
+		DEBUG("loadAttacksFromFile: Unable to open file");
 		retVal = false;
 	}
 	return retVal;
@@ -166,11 +166,7 @@ char BattleshipPlayerFromFile::getId() const
 void BattleshipPlayerFromFile::setBoard(const char ** board, int numRows, int numCols)
 {
 	/*as a "BattleshipPlayerFromFile" I'm really stupid and nothing about the
-	 *board interests me other than the numRows and numCols*/
+	 * board interests me other than the numRows and numCols*/
 	pBrd = new Board(numRows, numCols);
-
-	// after we have the board we can detect wrong attacks (invalid coords)
-	// so this is the correct time to call.
-	bool loadingSuccess = loadAttacksFromFile();
 }
 

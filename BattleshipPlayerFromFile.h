@@ -5,6 +5,7 @@
 #include <queue>
 using namespace std;
 
+
 /*This is a player*/
 class BattleshipPlayerFromFile : public IBattleshipGameAlgo
 {

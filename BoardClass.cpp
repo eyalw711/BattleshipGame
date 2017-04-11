@@ -44,7 +44,7 @@ std::istream& safeGetline(std::istream& is, std::string& t)
 //non-default ctor
 Board::Board(int rows, int columns) : rows_(rows), columns_(columns), data_(new char[rows * columns])
 {
-	cout << "non-default Board ctor activated - board with only spaces created" << endl;
+	DEBUG("non-default Board ctor activated - board with only spaces created");
 	memset(data_, ' ', rows*columns);
 
 	//example of usage as a Manager:
@@ -59,12 +59,14 @@ Board::Board(int rows, int columns) : rows_(rows), columns_(columns), data_(new 
 	pBrd = new Board(content, numRows, numCols);
 	*/
 }
+
+/*
 Board::Board(string data, int rows, int columns) : rows_(rows), columns_(columns), data_(new char[rows * columns])
 {
-	/*
-	Will fill missing slots with spaces, and will ignore
-	excessive slots
-	*/
+	
+	//Will fill missing slots with spaces, and will ignore
+	//excessive slots
+	
 	cout << "non-default Board ctor activated" << endl;
 	memset(data_, ' ', rows*columns);
 
@@ -72,6 +74,7 @@ Board::Board(string data, int rows, int columns) : rows_(rows), columns_(columns
 	auto copyAmount = (len <= rows*columns) ? len : rows*columns;
 	memcpy(data_, data.c_str(), copyAmount);
 }
+*/
 
 void Board::SetBoardFromFile(const char* path)
 {
@@ -79,11 +82,11 @@ void Board::SetBoardFromFile(const char* path)
 	std::string line;
 	
 	int row = 0;
-	while (getline(infile, line) && row < rows_)
+	while (safeGetline(infile, line) && row < rows_)
 	{
 		std::stringstream ss(line);
 		int column = 0;
-		while (column < line.size() && column < columns_)
+		while (column < static_cast<int>(line.size()) && column < columns_)
 		{
 			if (isLegalBoardElement(ss.peek()))
 			{
@@ -101,19 +104,20 @@ void Board::SetBoardFromFile(const char* path)
 //dtor
 Board::~Board()
 {
-	cout << "Board dtor activated" << endl;
+	DEBUG("Board dtor activated");
 	delete[] data_;
 }
 
 //copy ctor
 Board::Board(const Board &brd) : rows_(brd.rows_), columns_(brd.columns_), data_(new char[brd.rows_ * brd.columns_])
 {
-	cout << "copy Board ctor activated" << endl;
+	DEBUG("copy Board ctor activated");
 	memcpy(data_, brd.data_, brd.rows_ * brd.columns_);
 }
 
 Board& Board::operator=(const Board& other)
 {
+	DEBUG("operator= of Board was called");
 	if (this != &other)
 	{
 		if (columns_*rows_ != other.columns_*other.rows_) //bummer

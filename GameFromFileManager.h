@@ -7,18 +7,36 @@
 class GameFromFileManager
 {
 public:
-	//GameFromFileManager(Board *brd);
-	GameFromFileManager(Board * brd, string fila_a, string file_b);
-	bool isGameOn() const;
-	void mainLoop();
+
+	//-- ctors and dtors
+	GameFromFileManager();
+	GameFromFileManager(GameFromFileManager & other);
+	GameFromFileManager & operator=(GameFromFileManager & other);
+	~GameFromFileManager();
+
+	//-- getters
 	int getNumOfPlayers() const;
+	int numOfValidShips(char user) const;
+
+	//--queries
+	bool isGameOn(bool*) const;
+	bool isValidBoard() const;
+	bool selfHit(BattleshipPlayerFromFile&, std::pair<int, int>);
+
+	Ship * getShipAtCrd(int row, int col);
+
+	//-- manager logic
+	bool askPlayersToLoadAttacks();
+	bool initialize(int argc, char *argv[]);
+	void mainLoop();
 	void findShips(char user);
 	void revealSurroundings(int row, int col, char ship_type, Board &brd, vector<pair<int, int>> &coords);
-	int numOfValidShips(char user) const;
 	void setPlayersBoards();
+
+	//-- utils
 	void printShipsCoordinates(char user);
-	bool isValidBoard() const;
-	bool selfHit(BattleshipPlayerFromFile&, std::pair<int, int>) const;
+	static bool allSunk(vector<Ship> *ships);
+
 private:
 	int							currPlayerInx;
 	int							numOfPlayers;

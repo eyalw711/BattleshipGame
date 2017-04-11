@@ -5,6 +5,8 @@
 
 using namespace std;
 
+std::istream& safeGetline(std::istream& is, std::string& t);
+
 class Board
 {
 public:
@@ -18,12 +20,15 @@ public:
 	static const char B_SUBMARINE	= 'm';
 	static const char B_DESTROYER	= 'd';
 
-	Board(int rows, int columns);
-	Board(string, int, int);
-	void SetBoardFromFile(const char* path);
-	Board(const Board&);
+	Board(int rows, int columns); //non-default
+	Board(const Board&); //copy ctor
 	Board& operator=(const Board&);
 	char operator()(int, int) const;
+	friend std::ostream& operator<<(std::ostream &strm, const Board &brd);
+	~Board();
+	//Board(string, int, int);
+
+
 	bool isInBoard(int row, int col);
 	static bool isLegalBoardElement(char c);
 	static bool isUserShip(char user, char marineObject);
@@ -31,12 +36,11 @@ public:
 	static bool isBShip(char marineObject);
 
 	void setSlot(int row, int col, char marineObject);
+	void SetBoardFromFile(const char* path);
 
 	int getNumOfRows() const;
 	int getNumOfCols() const;
 
-	friend std::ostream& operator<<(std::ostream &strm, const Board &brd);
-	~Board();
 private:
 	int rows_;
 	int columns_;

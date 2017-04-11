@@ -1,11 +1,27 @@
 #include "stdafx.h"
 #include "Ship.h"
+#include <iostream>
 
 
 Ship::Ship()
 {
 	
 }
+Ship::Ship(const Ship & ship) : type(ship.type), size(ship.size),
+	coordinates(nullptr), valid(ship.valid)
+{
+	coordinates = new vector<pair<pair<int, int>, bool>>;
+	vector<pair<pair<int, int>, bool>>& vec = *coordinates;
+
+	vec = *(ship.coordinates); //overloaded operator= of vector: does deep copy
+}
+
+Ship& Ship::operator=(Ship& other)
+{
+	DEBUG("Oh no, operator= of Ship was used!");
+	return other;
+}
+
 /*Ship::Ship(ship_type type, pair<int, int> start, pair<int, int> end) : type(type), start(start), end(end),
 			 coordinates(new vector<pair<pair<int, int>, bool>>())
 {
@@ -43,6 +59,63 @@ Ship::Ship()
 }*/
 
 
+
+int Ship::getScoreForSinking() const
+{
+	switch (type)
+	{
+	case (ship_type::A_BOAT):
+	case (ship_type::B_BOAT):
+		return BOAT_SCORE;
+	case (ship_type::A_SATIL):
+	case(ship_type::B_SATIL):
+		return SATIL_SCORE;
+	case (ship_type::A_SUBMARINE):
+	case(ship_type::B_SUBMARINE):
+		return SUBMARINE_SCORE;
+	case (ship_type::A_DESTROYER):
+	case(ship_type::B_DESTROYER):
+		return DESTROYER_SCORE;
+	default:
+		return BOAT_SCORE;
+	}
+}
+
+void Ship::hitAt(int row, int col)
+{
+	for (vector<pair<pair<int, int>, bool>>::iterator it = coordinates->begin(); it != coordinates->end(); ++it)
+	{
+		if (make_pair(row, col) == it->first)
+		{
+			it->second = true;
+		}
+	}
+}
+
+bool Ship::isSunk() const
+{
+	for (vector<pair<pair<int, int>, bool>>::iterator it = coordinates->begin(); it != coordinates->end(); ++it)
+	{
+		if (!it->second) //second is a bool which means "is Hit"
+			return false;
+	}
+	return true;
+
+}
+bool Ship::containsCoord(int row, int col) const
+{
+	bool contains = false;
+	for (vector<pair<pair<int, int>, bool>>::iterator it = coordinates->begin(); it != coordinates->end(); ++it)
+	{
+		if (it->first == make_pair(row, col))
+		{
+			contains = true;
+			break;
+		}
+	}
+	return contains;
+}
+
 int Ship::getRow(vector<pair<pair<int, int>, bool>>::const_reference pair)
 {
 	return pair.first.first;
@@ -55,6 +128,25 @@ int  Ship::getCol(vector<pair<pair<int, int>, bool>>::const_reference pair)
 Ship::ship_type Ship::getType()
 {
 	return type;
+}
+
+bool Ship::isAShip()
+{
+	if (type == ship_type::A_BOAT || type == ship_type::A_SATIL || 
+		type == ship_type::A_SUBMARINE || type == ship_type::A_DESTROYER)
+	{
+		return true;
+	}
+	return false;
+}
+bool Ship::isBShip()
+{
+	if (type == ship_type::B_BOAT || type == ship_type::B_SATIL ||
+		type == ship_type::B_SUBMARINE || type == ship_type::B_DESTROYER)
+	{
+		return true;
+	}
+	return false;
 }
 
 int Ship::getSizeOfShipType(Ship::ship_type type)
@@ -159,4 +251,6 @@ bool Ship::isAdjacentShips(Ship other_ship)
 
 Ship::~Ship()
 {
+	DEBUG("dtor is called for a ship of type " << static_cast<char>(type));
+	delete coordinates;
 }
