@@ -2,16 +2,20 @@
 #include "GameFromFileManager.h"
 #include "BattleshipPlayerFromFile.h"
 
-GameFromFileManager::GameFromFileManager() : numOfPlayers(2) , brd(nullptr), attackFilesPaths(nullptr)
+GameFromFileManager::GameFromFileManager() : currPlayer(0) , numOfPlayers(2),
+											scores{0,0}, brd(nullptr),
+											a_ships(new vector<Ship>), b_ships(new vector<Ship>)
 {
 	//find both attack files + board
+	char *attackFilesPaths[2];
+		//finding...
 
 	//load board + check validity of board
 
 	//create all players
 	for (int i = 0; i < numOfPlayers; i++)
 	{
-		playersAndScores.push(std::pair<BattleshipPlayerFromFile, int>(BattleshipPlayerFromFile(i, attackFilesPaths[i]), 0));
+		players[i] = new BattleshipPlayerFromFile('A' + i, attackFilesPaths[i]);
 	}
 }
 

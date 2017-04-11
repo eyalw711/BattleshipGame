@@ -15,7 +15,7 @@ public:
 
 	~BattleshipPlayerFromFile() override; //TODO: why override?
 
-	void loadAttacksFromFile();
+	bool loadAttacksFromFile();
 
 	/* This function is my API to get my board */
 	void setBoard(const char** board, int numRows, int numCols) override;

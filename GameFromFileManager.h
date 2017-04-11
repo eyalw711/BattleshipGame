@@ -14,10 +14,11 @@ public:
 	void findShips(char user);
 	bool selfHit(BattleshipPlayerFromFile&, std::pair<int, int>) const;
 private:
-	std::queue<std::pair<BattleshipPlayerFromFile, int>> playersAndScores;
-	int numOfPlayers;
-	Board *brd;
+	int							currPlayer;
+	int							numOfPlayers;
+	BattleshipPlayerFromFile	*players[2];
+	int							scores[2];
+	Board						*brd;
 	vector<Ship> *a_ships;
 	vector<Ship> *b_ships;
-	string *attackFilesPaths;
 };

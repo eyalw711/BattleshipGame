@@ -13,10 +13,12 @@ BattleshipPlayerFromFile::BattleshipPlayerFromFile(char Id, string pathToAttackF
 {
 }
 
-void BattleshipPlayerFromFile::loadAttacksFromFile() //TODO: void? don't we want some signal if it fails? 
+/* returns true for success and false for error */
+bool BattleshipPlayerFromFile::loadAttacksFromFile()
 {
+	bool retVal = true;
 	if (pBrd == nullptr)
-		return;
+		return false; //can't do this if I don't have numRows, numCols
 
 	//-- open path
 	string line;
@@ -108,7 +110,6 @@ void BattleshipPlayerFromFile::loadAttacksFromFile() //TODO: void? don't we want
 				continue; //why continue???
 			}
 			//--stage8: check coords validity
-			//TODO: do it //we should still do it???
 			if (row < 1 || row > pBrd->getNumOfRows() || col < 1 ||  col > pBrd->getNumOfCols())
 			{
 				cout << "Coordinates are invalid to board!" << endl;
@@ -124,7 +125,9 @@ void BattleshipPlayerFromFile::loadAttacksFromFile() //TODO: void? don't we want
 	else
 	{
 		cout << "Unable to open file" << endl;
+		retVal = false;
 	}
+	return retVal;
 }
 
 BattleshipPlayerFromFile::~BattleshipPlayerFromFile()
@@ -133,6 +136,7 @@ BattleshipPlayerFromFile::~BattleshipPlayerFromFile()
 	delete attacksQueue;
 }
 
+/* returns next attack from file if there is any, else an invalid attack */
 std::pair<int, int> BattleshipPlayerFromFile::attack()
 {
 	if (attacksQueue->empty())
@@ -161,19 +165,12 @@ char BattleshipPlayerFromFile::getId() const
 /* This function is my API to acquire my board. */
 void BattleshipPlayerFromFile::setBoard(const char ** board, int numRows, int numCols)
 {
-	//-- Read the board content:
-
-	char *buff = new char[numRows * numCols];
-	for (auto i = 0; i < numRows; i++) // board a pointer to an array of rows
-	{
-		memcpy(buff + numCols * i, board[i], numCols); //copies one row into a long buffer
-	}
-
-	std::string content(reinterpret_cast<char*>(buff), numRows * numCols); //TODO: why reinterpret_cast???
-	pBrd = new Board(content, numRows, numCols);
+	/*as a "BattleshipPlayerFromFile" I'm really stupid and nothing about the
+	 *board interests me other than the numRows and numCols*/
+	pBrd = new Board(numRows, numCols);
 
 	// after we have the board we can detect wrong attacks (invalid coords)
 	// so this is the correct time to call.
-	loadAttacksFromFile();
+	bool loadingSuccess = loadAttacksFromFile();
 }
 

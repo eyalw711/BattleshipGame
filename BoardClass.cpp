@@ -43,8 +43,20 @@ std::istream& safeGetline(std::istream& is, std::string& t)
 //non-default ctor
 Board::Board(int rows, int columns) : rows_(rows), columns_(columns), data_(new char[rows * columns])
 {
-	cout << "non-default Board ctor activated" << endl;
+	cout << "non-default Board ctor activated - board with only spaces created" << endl;
 	memset(data_, ' ', rows*columns);
+
+	//example of usage as a Manager:
+	/*//-- Read the board content:
+	char *buff = new char[numRows * numCols];
+	for (auto i = 0; i < numRows; i++) // board a pointer to an array of rows
+	{
+	memcpy(buff + numCols * i, board[i], numCols); //copies one row into a long buffer
+	}
+
+	std::string content(reinterpret_cast<char*>(buff), numRows * numCols); //TODO: why reinterpret_cast???
+	pBrd = new Board(content, numRows, numCols);
+	*/
 }
 Board::Board(string data, int rows, int columns) : rows_(rows), columns_(columns), data_(new char[rows * columns])
 {
