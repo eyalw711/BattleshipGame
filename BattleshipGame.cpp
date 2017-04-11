@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
 		cout << brd << endl;
 
 		// create instance of Game Manager		
-		GameFromFileManager manager(&brd);
+		GameFromFileManager manager(&brd, file_a, file_b);
 		// printing coordinates of ships:
 		//manager.printShipsCoordinates('A');
 		//manager.printShipsCoordinates('B');
@@ -98,6 +98,9 @@ int main(int argc, char *argv[])
 			return -1;
 		else
 			cout << "*** board is valid ***" << endl; // TODO: delete it
+
+		manager.setPlayersBoards();
+		manager.mainLoop();
 		
 	}
 	else

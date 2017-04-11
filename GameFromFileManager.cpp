@@ -6,23 +6,16 @@
 
 using namespace std;
 
-GameFromFileManager::GameFromFileManager(Board *brd) : numOfPlayers(2), playersAndScores(std::queue<std::pair<BattleshipPlayerFromFile, int>>()), brd(brd), a_ships(nullptr), b_ships(nullptr), attackFilesPaths(nullptr)
-{
-	//find both attack files + board // TODO: not  here
-
-	//load board + check validity of board // TODO: not  here
+GameFromFileManager::GameFromFileManager(Board *brd, string file_a, string file_b) : currPlayerInx(0),
+	numOfPlayers(2), players{new BattleshipPlayerFromFile('A', file_a), new BattleshipPlayerFromFile('B', file_b)},
+	scores{0,0}, brd(brd), a_ships(new vector<Ship>), b_ships(new vector<Ship>)
+{			
 	findShips('A');
 	findShips('B');
-
-	//create all players
-	/*for (int i = 0; i < numOfPlayers; i++)
-	{
-		this->playersAndScores.push(std::pair<BattleshipPlayerFromFile, int>(BattleshipPlayerFromFile(i, attackFilesPaths[i]), 0));
-	}*/
 }
 
 //user should be 'A' or 'B'
-int GameFromFileManager::numOfValidShips(char user)
+int GameFromFileManager::numOfValidShips(char user) const
 {
 	int cnt = 0;
 	vector<Ship> *ships;
@@ -37,7 +30,16 @@ int GameFromFileManager::numOfValidShips(char user)
 	return cnt;
 }
 
-bool GameFromFileManager::isValidBoard()
+void GameFromFileManager::setPlayersBoards()
+{
+	/* As a manager of stupid players, I know in advance they don't care about the
+	 * board so I don't make special effort in giving it to them...
+	 */
+	players[0]->setBoard(nullptr, brd->getNumOfRows(), brd->getNumOfCols());
+	players[1]->setBoard(nullptr, brd->getNumOfRows(), brd->getNumOfCols());
+}
+
+bool GameFromFileManager::isValidBoard() const
 {
 	Ship::ship_type ship_types_A[4] = { Ship::ship_type::A_BOAT, Ship::ship_type::A_SATIL, Ship::ship_type::A_SUBMARINE, Ship::ship_type::A_DESTROYER };
 	Ship::ship_type ship_types_B[4] = { Ship::ship_type::B_BOAT, Ship::ship_type::B_SATIL, Ship::ship_type::B_SUBMARINE, Ship::ship_type::B_DESTROYER };
@@ -140,30 +142,37 @@ void GameFromFileManager::mainLoop()
 
 	while (isGameOn())
 	{
-		auto currPlayerScorePair = playersAndScores.front();
-		playersAndScores.pop();
-		auto currPlayer = currPlayerScorePair.first;
-
+		BattleshipPlayerFromFile& currPlayer = *(players[currPlayerInx]);
 		do
 		{
 			auto attack = currPlayer.attack();
 			if (board(attack.first, attack.second) == Board::SEA)
 			{
-				//nothing happens and the turn passes
-
 				//notify players
-
+				players[0]->notifyOnAttackResult(currPlayerInx, attack.first,
+					attack.second, AttackResult::Miss);
+				players[1]->notifyOnAttackResult(currPlayerInx, attack.first,
+					attack.second, AttackResult::Miss);
+				
+				//nothing happens and the turn passes
+				currPlayerInx = (currPlayerInx + 1) % 2;
+				
 				break;
 			}
 			else if (selfHit(currPlayer, attack))
 			{
 				//player hits itself
-				board.setSlot(attack.first, attack.second, Board::SEA);
+				
 				//if ship sinks grant points to enemy
 
 				// notify players
-
-				//pass turn = break
+				players[0]->notifyOnAttackResult(currPlayerInx, attack.first,
+					attack.second, AttackResult::Miss);
+				players[1]->notifyOnAttackResult(currPlayerInx, attack.first,
+					attack.second, AttackResult::Miss);
+				
+				//pass turn
+				currPlayerInx = (currPlayerInx + 1) % 2;
 				break;
 			}
 			else
@@ -178,10 +187,9 @@ void GameFromFileManager::mainLoop()
 				//next turn = no break
 			}
 		} while (true);
-
-		//end of turn - player goes to end of queue 
-		playersAndScores.push(currPlayerScorePair);
 	}
+
+	//TODO: end of game -- notify winner and score
 }
 
 int GameFromFileManager::getNumOfPlayers() const
