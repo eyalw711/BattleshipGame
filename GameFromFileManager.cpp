@@ -284,6 +284,11 @@ void GameFromFileManager::mainLoop()
 		do
 		{
 			auto attack = currPlayer.attack();
+			DEBUG("player " << currPlayerInx << " attack is "  << attack.first << ", " << attack.second);
+			DEBUG("Points:");
+			DEBUG("Player A: " << scores[0]);
+			DEBUG("Player B: " << scores[1]);
+
 			if (attack.first == -1 && attack.second == -1)
 			{
 				OutOfAttacks[currPlayerInx] = true;
@@ -291,7 +296,7 @@ void GameFromFileManager::mainLoop()
 				currPlayerInx = (currPlayerInx + 1) % 2;
 				break;
 			}
-			if (board(attack.first, attack.second) == Board::SEA)
+			if (board(attack.first, attack.second) == Board::SEA || getShipAtCrd(attack.first, attack.second)->isSunk())
 			{
 				//notify players
 				players[0]->notifyOnAttackResult(currPlayerInx, attack.first,
@@ -338,6 +343,7 @@ void GameFromFileManager::mainLoop()
 					attack.second, shipPtr->isSunk() ? AttackResult::Sink : AttackResult::Hit);
 				players[1]->notifyOnAttackResult(currPlayerInx, attack.first,
 					attack.second, shipPtr->isSunk() ? AttackResult::Sink : AttackResult::Hit);
+
 
 				if (!isGameOn(OutOfAttacks)) //which means this hit caused victory
 					break;
