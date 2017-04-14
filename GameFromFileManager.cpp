@@ -44,7 +44,7 @@ bool GameFromFileManager::initialize(int argc, char *argv[])
 			return false;
 		}
 
-		string const command = string("dir ") + argv[1] + string(" /b /a-d > file_names.txt 2>&1");
+		string const command = string("dir \"") + argv[1] + string("\" /b /a-d > file_names.txt 2>&1");
 		system(command.c_str()); //insert to file_names.txt
 	}
 	else if (argc == 1)
