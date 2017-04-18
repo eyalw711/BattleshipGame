@@ -9,6 +9,83 @@
 #include <sys/stat.h>
 #include <iso646.h>
 using namespace std;
+bool QUIET = false;
+int MILISECONDS_PRINT_DELAY = 2000;
+
+void gotoxy(int x, int y)
+{
+	COORD coord;
+	coord.X = x; coord.Y = y;
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+	return;
+}
+
+void setcolor(WORD color)
+{
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
+	return;
+}
+
+void setForeGroundColor(int ForeGroundColor)
+{
+	int color = ForeGroundColor;
+	setcolor(color);
+}
+
+COORD GetConsoleCursorPosition(HANDLE hConsoleOutput)
+{
+	CONSOLE_SCREEN_BUFFER_INFO cbsi;
+	if (GetConsoleScreenBufferInfo(hConsoleOutput, &cbsi))
+	{
+		return cbsi.dwCursorPosition;
+	}
+	else
+	{
+		// The function failed. Call GetLastError() for details.
+		COORD invalid = { 0, 0 };
+		return invalid;
+	}
+}
+
+void GameFromFileManager::updateBoardPrintHit(COORD hit_coord)
+{
+	if (!QUIET)
+	{
+		std::this_thread::sleep_for(std::chrono::milliseconds(MILISECONDS_PRINT_DELAY));
+		HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+		COORD cursor_coord = GetConsoleCursorPosition(h);
+		gotoxy(4 + hit_coord.X * 2 - 2, hit_coord.Y);
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 4); cout << "@";
+		gotoxy(4 + hit_coord.X * 2 - 2, hit_coord.Y);
+		std::this_thread::sleep_for(std::chrono::milliseconds(350));
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 4); cout << " ";
+		gotoxy(4 + hit_coord.X * 2 - 2, hit_coord.Y);
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 4); cout << "X";
+		gotoxy(cursor_coord.X, cursor_coord.Y);
+		setcolor(7);
+	}
+}
+
+void GameFromFileManager::updateBoardPrintMiss(COORD hit_coord, char current)
+{
+	if (!QUIET)
+	{
+		std::this_thread::sleep_for(std::chrono::milliseconds(MILISECONDS_PRINT_DELAY));
+		HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+		COORD cursor_coord = GetConsoleCursorPosition(h);
+		gotoxy(4 + hit_coord.X * 2 - 2, hit_coord.Y);
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 4); cout << "@";
+		gotoxy(4 + hit_coord.X * 2 - 2, hit_coord.Y);
+		std::this_thread::sleep_for(std::chrono::milliseconds(350));
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 4); cout << " ";
+		gotoxy(4 + hit_coord.X * 2 - 2, hit_coord.Y);
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 4); cout << current;
+		gotoxy(cursor_coord.X, cursor_coord.Y);
+		setcolor(7);
+	}
+}
 
 GameFromFileManager::GameFromFileManager(GameFromFileManager& other)
 {
@@ -36,6 +113,14 @@ bool GameFromFileManager::initialize(int argc, char *argv[])
 	string file_board, file_a, file_b;
 
 	/* reading file names in the path or current directory to file_names.txt */
+	for (int i= 0; i < argc ; i++)
+	{
+		string argument = argv[i];
+		if (argument == "-quiet")
+			QUIET = true;
+		if (argument == "-delay")
+			MILISECONDS_PRINT_DELAY = atoi(argv[i + 1]);
+	}
 	if (argc >= 2)
 	{
 		if (!is_valid_dir_path(argv[1]))
@@ -95,8 +180,10 @@ bool GameFromFileManager::initialize(int argc, char *argv[])
 			file_a = string(argv[1]) + "\\" + file_a;
 			file_b = string(argv[1]) + "\\" + file_b;
 		}
-		DEBUG(*brd);
-		
+		//DEBUG(*brd);
+		if (!QUIET)
+			cout << *brd << endl;
+
 		// find ships
 		this->findShips('A');
 		this->findShips('B');
@@ -298,6 +385,14 @@ void GameFromFileManager::mainLoop()
 			}
 			if (board(attack.first, attack.second) == Board::SEA || getShipAtCrd(attack.first, attack.second)->isSunk())
 			{
+				//update board print
+				COORD hit_coord;
+				hit_coord.Y = attack.first;
+				hit_coord.X = attack.second;
+				if (board(attack.first, attack.second) == Board::SEA)
+					updateBoardPrintMiss(hit_coord, Board::SEA);
+				else
+					updateBoardPrintMiss(hit_coord,'X');
 				//notify players
 				players[0]->notifyOnAttackResult(currPlayerInx, attack.first,
 					attack.second, AttackResult::Miss);
@@ -313,6 +408,14 @@ void GameFromFileManager::mainLoop()
 				//player hits itself
 				Ship *shipPtr = getShipAtCrd(attack.first, attack.second);
 				shipPtr->hitAt(attack.first, attack.second);
+
+
+				//update board print
+				COORD hit_coord;
+				hit_coord.Y = attack.first;
+				hit_coord.X = attack.second;
+				updateBoardPrintHit(hit_coord);
+
 
 				//if ship sinks grant points to enemy
 				if (shipPtr->isSunk())
@@ -333,6 +436,12 @@ void GameFromFileManager::mainLoop()
 				//player hits enemy
 				Ship *shipPtr = getShipAtCrd(attack.first, attack.second);
 				shipPtr->hitAt(attack.first, attack.second);
+
+				//update board print
+				COORD hit_coord;
+				hit_coord.Y = attack.first;
+				hit_coord.X = attack.second;
+				updateBoardPrintHit(hit_coord);
 
 				//if ship sinks grant points to player
 				if (shipPtr->isSunk())

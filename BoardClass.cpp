@@ -253,7 +253,10 @@ std::ostream& operator<<(std::ostream &strm, const Board &brd) {
 
 	for (int i = 1; i <= brd.rows_; i++)
 	{
-		strm << i << "   ";
+		if (i == 10)
+			strm << i << "  ";
+		else
+			strm << i << "   ";
 		for(int j = 1; j <= brd.columns_; j++)
 		{
 			strm << brd(i,j) << " ";

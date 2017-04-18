@@ -3,6 +3,9 @@
 #include <queue>
 #include "BoardClass.h"
 #include "BattleshipPlayerFromFile.h"
+#include <windows.h>
+#include <thread>         // std::this_thread::sleep_for
+#include <chrono>         // std::chrono::seconds
 
 class GameFromFileManager
 {
@@ -35,6 +38,8 @@ public:
 
 	//-- utils
 	void printShipsCoordinates(char user);
+	void updateBoardPrintHit(COORD hit_coord);
+	void updateBoardPrintMiss(COORD hit_coord, char current);
 	static bool allSunk(vector<Ship> *ships);
 
 private:
