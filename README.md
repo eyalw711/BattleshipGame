@@ -1,2 +1,3 @@
-just another stupid assignment
-totally!
+Advanced Topics In Programming (C++ Course)
+Battleship Game
+Assignment #1
