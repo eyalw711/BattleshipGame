@@ -22,6 +22,8 @@ public:
 	static const int SUBMARINE_SCORE	= 7;
 	static const int DESTROYER_SCORE	= 8;
 
+	static const int MAXIMUM_SHIP_SIZE = DESTROYER_SIZE;
+
 	Ship();
 	Ship(const Ship& ship);
 	Ship & operator=(Ship & other);
@@ -29,22 +31,22 @@ public:
 	~Ship();
 	
 	//-- queries
-	bool isAShip();
-	bool isBShip();
+	bool isAShip() const;
+	bool isBShip() const;
 	bool isSunk() const;
 	bool containsCoord(int row, int col) const;
-	static bool isValidShip(vector<pair<pair<int, int>, bool>>* coordinates, ship_type type);
-	static bool isAdjacentCoordinates(pair<int, int> a, pair<int, int> b);
-	bool isAdjacentShips(Ship other_ship);
+	bool Ship::isValidShip(const vector<pair<pair<int, int>, bool>>& coordinates, ship_type type);
+	static bool isAdjacentCoordinates(pair<int, int> a, pair<int, int> b); 
+	bool isAdjacentShips(Ship other_ship) const;
 
 	//-- getters
 	static int getSizeOfShipType(Ship::ship_type type);
-	vector<pair<pair<int, int>, bool>> * Ship::getCoordinates();
+	const vector<pair<pair<int, int>, bool>>& Ship::getCoordinates() const;
 	static int getRow(vector<pair<pair<int, int>, bool>>::const_reference pair);
 	static int getCol(vector<pair<pair<int, int>, bool>>::const_reference pair);
 	int getScoreForSinking() const;
-	bool getValid();
-	Ship::ship_type getType();
+	bool getValid() const;
+	Ship::ship_type getType() const;
 
 	//-- operations
 	void hitAt(int row, int col);
@@ -55,7 +57,7 @@ private:
 	int size;
 	//pair<int, int> start;
 	//pair<int, int> end;
-	vector<pair<pair<int, int>,bool>> *coordinates; // bool is "isHit" (false if not hit)
+	vector<pair<pair<int, int>,bool>> coordinates; // bool is "isHit" (false if not hit)
 	bool valid; //true is ship is of valid shape
 };
 

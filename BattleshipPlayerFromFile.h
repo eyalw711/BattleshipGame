@@ -12,9 +12,11 @@ class BattleshipPlayerFromFile : public IBattleshipGameAlgo
 public:
 
 	/*This ctor gets a path to attack file*/
-	BattleshipPlayerFromFile(char Id, string PathTOAttacksFile);
+	BattleshipPlayerFromFile();
 
 	~BattleshipPlayerFromFile() override; //TODO: why override?
+
+	bool init(const std::string& path) override; // returns whether the init succeeded or failed
 
 	bool loadAttacksFromFile();
 
@@ -29,8 +31,8 @@ public:
 
 	char getId() const;
 private:
-	Board *pBrd;
-	std::queue<std::pair<int,int>> *attacksQueue;
+	Board brd;
+	std::queue<std::pair<int,int>> attacksQueue;
 	char Id;
 	string pathToAttacksFile;
 };

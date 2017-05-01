@@ -25,8 +25,6 @@ int main(int argc, char *argv[])
 		return -1;
 
 	manager.setPlayersBoards();
-	if (manager.askPlayersToLoadAttacks() == false)
-		return -1;
 
 	manager.mainLoop();
 

@@ -3,10 +3,16 @@
 #include <queue>
 #include "BoardClass.h"
 #include "BattleshipPlayerFromFile.h"
-#include <windows.h>
-#include <thread>         // std::this_thread::sleep_for
-#include <chrono>         // std::chrono::seconds
+#include "Utils.h"
 
+typedef struct PlayerData
+{
+	IBattleshipGameAlgo *algo;
+	char id;
+	int score;
+	vector<Ship> ships;
+
+} PlayerData;
 class GameFromFileManager
 {
 public:
@@ -24,30 +30,29 @@ public:
 	//--queries
 	bool isGameOn(bool*) const;
 	bool isValidBoard() const;
-	bool selfHit(BattleshipPlayerFromFile&, std::pair<int, int>);
+	bool GameFromFileManager::selfHit(PlayerData& player, std::pair<int, int> attack);
 
 	Ship * getShipAtCrd(int row, int col);
 
 	//-- manager logic
-	bool askPlayersToLoadAttacks();
 	bool initialize(int argc, char *argv[]);
 	void mainLoop();
-	void findShips(char user);
+	void GameFromFileManager::findShips(char user, vector<Ship>& ships); 
 	void revealSurroundings(int row, int col, char ship_type, Board &brd, vector<pair<int, int>> &coords);
 	void setPlayersBoards();
 
 	//-- utils
 	void printShipsCoordinates(char user);
-	void updateBoardPrintHit(COORD hit_coord);
-	void updateBoardPrintMiss(COORD hit_coord, char current);
-	static bool allSunk(vector<Ship> *ships);
+	static bool allSunk(const vector<Ship>& ships);
+	static const int number_of_players = 2;
+	static const int PLAYER_A = 0;
+	static const int PLAYER_B = 1;
 
 private:
-	int							currPlayerInx;
-	int							numOfPlayers;
-	BattleshipPlayerFromFile	*players[2];
-	int							scores[2];
-	Board						*brd;
-	vector<Ship> *a_ships;
-	vector<Ship> *b_ships;
+	int				currPlayerInx;
+	int				numOfPlayers;
+	PlayerData		players[number_of_players];
+	Board			brd;
+
+
 };

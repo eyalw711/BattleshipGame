@@ -8,17 +8,21 @@
 using namespace  std;
 
 /* initializes the attacksQueue */
-BattleshipPlayerFromFile::BattleshipPlayerFromFile(char Id, string pathToAttackFile) : 
-	pBrd(nullptr), attacksQueue(new std::queue<std::pair<int, int>>), Id(Id), pathToAttacksFile(pathToAttackFile)
+BattleshipPlayerFromFile::BattleshipPlayerFromFile() : 
+	brd(Board()), attacksQueue(std::queue<std::pair<int, int>>())
 {
+}
+
+bool BattleshipPlayerFromFile::init(const std::string& path)
+{
+	pathToAttacksFile = path;
+	return loadAttacksFromFile();
 }
 
 /* returns true for success and false for error */
 bool BattleshipPlayerFromFile::loadAttacksFromFile()
 {
 	bool retVal = true;
-	if (pBrd == nullptr)
-		return false; //can't do this if I don't have numRows, numCols
 
 	//-- open path
 	string line;
@@ -110,14 +114,14 @@ bool BattleshipPlayerFromFile::loadAttacksFromFile()
 				continue; //why continue???
 			}
 			//--stage8: check coords validity
-			if (row < 1 || row > pBrd->getNumOfRows() || col < 1 ||  col > pBrd->getNumOfCols())
+			if (row < 1 || row > brd.getNumOfRows() || col < 1 ||  col > brd.getNumOfCols())
 			{
 				DEBUG("Coordinates are invalid to board!");
 				continue;
 			}
 			//-- success
 			//queue attacks into attacksQueue
-			attacksQueue->push(std::pair<int, int>(row, col));
+			attacksQueue.push(std::pair<int, int>(row, col));
 			DEBUG("Entered attack " << row << "," << col);
 		}
 		attacksFile.close();
@@ -132,21 +136,19 @@ bool BattleshipPlayerFromFile::loadAttacksFromFile()
 
 BattleshipPlayerFromFile::~BattleshipPlayerFromFile()
 {
-	delete pBrd;
-	delete attacksQueue;
 }
 
 /* returns next attack from file if there is any, else an invalid attack */
 std::pair<int, int> BattleshipPlayerFromFile::attack()
 {
-	if (attacksQueue->empty())
+	if (attacksQueue.empty())
 	{
 		return std::pair<int, int>(-1, -1);
 	}
 	else
 	{
-		auto retVal = attacksQueue->front();
-		attacksQueue->pop();
+		auto retVal = attacksQueue.front();
+		attacksQueue.pop();
 		return retVal;
 	}
 }
@@ -167,6 +169,6 @@ void BattleshipPlayerFromFile::setBoard(const char ** board, int numRows, int nu
 {
 	/*as a "BattleshipPlayerFromFile" I'm really stupid and nothing about the
 	 * board interests me other than the numRows and numCols*/
-	pBrd = new Board(numRows, numCols);
+	brd = Board(numRows, numCols);
 }
 

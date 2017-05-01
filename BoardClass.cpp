@@ -41,40 +41,15 @@ std::istream& safeGetline(std::istream& is, std::string& t)
 	}
 }
 
+
+
 //non-default ctor
 Board::Board(int rows, int columns) : rows_(rows), columns_(columns), data_(new char[rows * columns])
 {
 	DEBUG("non-default Board ctor activated - board with only spaces created");
 	memset(data_, ' ', rows*columns);
-
-	//example of usage as a Manager:
-	/*//-- Read the board content:
-	char *buff = new char[numRows * numCols];
-	for (auto i = 0; i < numRows; i++) // board a pointer to an array of rows
-	{
-	memcpy(buff + numCols * i, board[i], numCols); //copies one row into a long buffer
-	}
-
-	std::string content(reinterpret_cast<char*>(buff), numRows * numCols); //TODO: why reinterpret_cast???
-	pBrd = new Board(content, numRows, numCols);
-	*/
 }
 
-/*
-Board::Board(string data, int rows, int columns) : rows_(rows), columns_(columns), data_(new char[rows * columns])
-{
-	
-	//Will fill missing slots with spaces, and will ignore
-	//excessive slots
-	
-	cout << "non-default Board ctor activated" << endl;
-	memset(data_, ' ', rows*columns);
-
-	int len = data.length(); //doesn't count '\0'
-	auto copyAmount = (len <= rows*columns) ? len : rows*columns;
-	memcpy(data_, data.c_str(), copyAmount);
-}
-*/
 
 void Board::SetBoardFromFile(const char* path)
 {

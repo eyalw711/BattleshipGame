@@ -20,13 +20,16 @@ public:
 	static const char B_SUBMARINE	= 'm';
 	static const char B_DESTROYER	= 'd';
 
+	static const int DEFAULT_BOARD_WIDTH = 10;
+
+	Board() : Board(DEFAULT_BOARD_WIDTH, DEFAULT_BOARD_WIDTH) {}//empty constructor
 	Board(int rows, int columns); //non-default
 	Board(const Board&); //copy ctor
 	Board& operator=(const Board&);
 	char operator()(int, int) const;
 	friend std::ostream& operator<<(std::ostream &strm, const Board &brd);
 	~Board();
-	//Board(string, int, int);
+
 
 
 	bool isInBoard(int row, int col);
