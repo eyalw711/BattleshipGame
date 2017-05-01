@@ -51,29 +51,38 @@ Board::Board(int rows, int columns) : rows_(rows), columns_(columns), data_(new 
 }
 
 
-void Board::SetBoardFromFile(const char* path)
+bool Board::SetBoardFromFile(const char* path)
 {
 	std::ifstream infile(path);
 	std::string line;
 	
 	int row = 0;
-	while (safeGetline(infile, line) && row < rows_)
+	if (infile.is_open())
 	{
-		std::stringstream ss(line);
-		int column = 0;
-		while (column < static_cast<int>(line.size()) && column < columns_)
+		while (safeGetline(infile, line) && row < rows_)
 		{
-			if (isLegalBoardElement(ss.peek()))
+			std::stringstream ss(line);
+			int column = 0;
+			while (column < static_cast<int>(line.size()) && column < columns_)
 			{
-				data_[columns_*row + column] = ss.peek();
-				ss.ignore();
+				if (isLegalBoardElement(ss.peek()))
+				{
+					data_[columns_*row + column] = ss.peek();
+					ss.ignore();
+				}
+				else
+					ss.ignore();
+				column++;
 			}
-			else
-				ss.ignore();
-			column++;
+			row++;
 		}
-		row++;
+		infile.close();
+		return true;
 	}
+
+	DEBUG("SetBoardFromFile: Unable to open file");
+	return false;
+
 }
 
 //dtor

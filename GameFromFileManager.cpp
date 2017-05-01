@@ -31,11 +31,8 @@ bool is_valid_dir_path(const char *pathname)
 
 bool GameFromFileManager::initialize(int argc, char *argv[])
 {
-	bool find_board = false, find_a = false, find_b = false;
+	bool find_board = false, find_a = false, find_b = false, set_boards_sucess = true;
 	string file_board, file_a, file_b;
-
-	Utils::set_quiet(false);
-	Utils::set_delay(Utils::DEFAULT_PRINT_DELAY);
 
 	/* reading file names in the path or current directory to file_names.txt */
 	for (int i= 0; i < argc ; i++)
@@ -97,13 +94,18 @@ bool GameFromFileManager::initialize(int argc, char *argv[])
 		// set board using file
 		if (argc == 1)
 		{
-			brd.SetBoardFromFile((file_board).c_str());
+			set_boards_sucess = brd.SetBoardFromFile((file_board).c_str());
 		}
 		else
 		{
-			brd.SetBoardFromFile((string(argv[1]) + "\\" + file_board).c_str());
+			set_boards_sucess = brd.SetBoardFromFile((string(argv[1]) + "\\" + file_board).c_str());
 			file_a = string(argv[1]) + "\\" + file_a;
 			file_b = string(argv[1]) + "\\" + file_b;
+		}
+		if(!set_boards_sucess)
+		{
+			std::cout << "Error while open board file" << std::endl;
+			return -1;
 		}
 		//DEBUG(*brd);
 		if (!Utils::get_quiet())
@@ -152,6 +154,10 @@ numOfPlayers(number_of_players), brd(Board())
 
 	player1.algo = nullptr;
 	player2.algo = nullptr;
+
+	players[PLAYER_A] = player1;
+	players[PLAYER_B] = player2;
+
 	
 }
 
