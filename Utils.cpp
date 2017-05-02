@@ -42,43 +42,23 @@ COORD Utils::GetConsoleCursorPosition(HANDLE hConsoleOutput)
 	}
 }
 
-void Utils::updateBoardPrintHit(COORD hit_coord)
+void Utils::updateBoardPrint(COORD hit_coord, char current)
 {
 	if (!Utils::QUIET)
 	{
 		std::this_thread::sleep_for(std::chrono::milliseconds(MILISECONDS_PRINT_DELAY));
 		HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
 		COORD cursor_coord = GetConsoleCursorPosition(h);
-		gotoxy(4 + hit_coord.X * 2 - 2, hit_coord.Y);
-		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 4); cout << "@";
-		gotoxy(4 + hit_coord.X * 2 - 2, hit_coord.Y);
-		std::this_thread::sleep_for(std::chrono::milliseconds(350));
-		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 4); cout << " ";
-		gotoxy(4 + hit_coord.X * 2 - 2, hit_coord.Y);
-		std::this_thread::sleep_for(std::chrono::milliseconds(500));
-		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 4); cout << "X";
+		gotoxy(PRINT_INDENT + hit_coord.X * 2 - 2, hit_coord.Y);
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), RED_COLOR); cout << "@";
+		gotoxy(PRINT_INDENT + hit_coord.X * 2 - 2, hit_coord.Y);
+		std::this_thread::sleep_for(std::chrono::milliseconds(DEFAULT_START_ANIMATION_DELAY));
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), RED_COLOR); cout << " ";
+		gotoxy(PRINT_INDENT + hit_coord.X * 2 - 2, hit_coord.Y);
+		std::this_thread::sleep_for(std::chrono::milliseconds(DEFAULT_END_ANIMATION_DELAY));
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), RED_COLOR); cout << current;
 		gotoxy(cursor_coord.X, cursor_coord.Y);
-		setcolor(7);
-	}
-}
-
-void Utils::updateBoardPrintMiss(COORD hit_coord, char current)
-{
-	if (!Utils::QUIET)
-	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(MILISECONDS_PRINT_DELAY));
-		HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
-		COORD cursor_coord = GetConsoleCursorPosition(h);
-		gotoxy(4 + hit_coord.X * 2 - 2, hit_coord.Y);
-		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 4); cout << "@";
-		gotoxy(4 + hit_coord.X * 2 - 2, hit_coord.Y);
-		std::this_thread::sleep_for(std::chrono::milliseconds(350));
-		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 4); cout << " ";
-		gotoxy(4 + hit_coord.X * 2 - 2, hit_coord.Y);
-		std::this_thread::sleep_for(std::chrono::milliseconds(500));
-		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 4); cout << current;
-		gotoxy(cursor_coord.X, cursor_coord.Y);
-		setcolor(7);
+		setcolor(WHITE_COLOR);
 	}
 }
 
@@ -93,4 +73,26 @@ bool Utils::get_quiet()
 void Utils::set_delay(int delay)
 {
 	Utils::MILISECONDS_PRINT_DELAY = delay;
+}
+
+string Utils::find_path(const string& path_expr_to_find)
+{
+	WIN32_FIND_DATAA fileData;
+	HANDLE hFind;
+	string retVal = "";
+	hFind = FindFirstFileA(path_expr_to_find.c_str(), &fileData);
+	if (hFind == INVALID_HANDLE_VALUE)
+	{
+		if (GetLastError() == ERROR_FILE_NOT_FOUND)
+			retVal = FILE_NOT_FOUND;
+		//else
+	    //	retVal = ERROR_FINDING_PATH;
+	}
+
+	else
+	{
+		retVal = fileData.cFileName;
+		FindClose(hFind);
+	}
+	return retVal;
 }

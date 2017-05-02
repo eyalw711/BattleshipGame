@@ -39,7 +39,7 @@ public:
 	static bool isBShip(char marineObject);
 
 	void setSlot(int row, int col, char marineObject);
-	void SetBoardFromFile(const char* path);
+	bool SetBoardFromFile(const char* path);
 
 	int getNumOfRows() const;
 	int getNumOfCols() const;

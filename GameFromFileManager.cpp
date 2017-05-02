@@ -29,13 +29,54 @@ bool is_valid_dir_path(const char *pathname)
 	return true;
 }
 
-bool GameFromFileManager::initialize(int argc, char *argv[])
+bool GameFromFileManager::initialize_board(string file_board)
 {
-	bool find_board = false, find_a = false, find_b = false, set_boards_sucess = true;
-	string file_board, file_a, file_b;
+	bool set_boards_sucess = true;
+	// set board using file
+	set_boards_sucess = brd.SetBoardFromFile((file_board).c_str());
+	if (!set_boards_sucess)
+	{
+		std::cout << "Error while open board file" << std::endl;
+		return false;
+	}
+	//DEBUG(*brd);
+	if (!Utils::get_quiet())
+		cout << brd << endl;
 
-	/* reading file names in the path or current directory to file_names.txt */
-	for (int i= 0; i < argc ; i++)
+	// find ships
+	this->findShips('A', players[PLAYER_A].ships);
+	this->findShips('B', players[PLAYER_B].ships);
+
+
+	// check board validity
+	if (!this->isValidBoard())
+		return false;
+	DEBUG("*** board is valid ***");
+
+	// printing coordinates of ships:
+	//this->printShipsCoordinates('A');
+	//this->printShipsCoordinates('B');
+	return true;
+}
+
+bool GameFromFileManager::initialize_players(string file_a, string file_b)
+{
+	bool retVal = true;
+	players[0].algo = new BattleshipPlayerFromFile(); //TODO: create dll IAlgo!
+	players[0].algo->setBoard(nullptr, brd.getNumOfRows(), brd.getNumOfCols()); //TODO: create the board really!
+	retVal &= players[0].algo->init(file_a);
+	players[1].algo = new BattleshipPlayerFromFile();
+	players[1].algo->setBoard(nullptr, brd.getNumOfRows(), brd.getNumOfCols());
+	retVal &= players[1].algo->init(file_b);
+
+	return retVal;
+}
+
+pair<bool, string> GameFromFileManager::parse_command_line_arguments(int argc, char *argv[])
+{
+	string dir_path = ".";
+	/* parsing command line arguments */
+	for (int i = 0; i < argc; i++)
 	{
 		string argument = argv[i];
 		if (argument == "-quiet")
@@ -48,39 +89,39 @@ bool GameFromFileManager::initialize(int argc, char *argv[])
 		if (!is_valid_dir_path(argv[1]))
 		{
 			cout << "Wrong path: " << argv[1] << endl; //ReqPrnt
-			return false;
+			return make_pair(false, dir_path);
 		}
-
-		string const command = string("dir \"") + argv[1] + string("\" /b /a-d > file_names.txt 2>&1");
-		system(command.c_str()); //insert to file_names.txt
+		dir_path = string(argv[1]);
 	}
-	else if (argc == 1)
+	return make_pair(true, dir_path);
+}
+bool GameFromFileManager::initialize(int argc, char *argv[])
+{
+	bool find_board = false, find_a = false, find_b = false;
+	string dir_path = ".", file_board, file_a, file_b, find_file_ret_val;
+	pair<bool, string> parser_ret_val = parse_command_line_arguments(argc, argv);
+	dir_path = parser_ret_val.second;
+	if (parser_ret_val.first == false)
+		return false;
+	/* find files */
+	find_file_ret_val = Utils::find_path(dir_path + "\\*.sboard");
+	if (find_file_ret_val != FILE_NOT_FOUND)
 	{
-		system("dir /b /a-d > file_names.txt 2>&1");
-	}
-
-	/* reading file_name.txt and validate file types */
-	std::ifstream infile("file_names.txt");
-	std::string line;
-	while (std::getline(infile, line))
+		file_board = dir_path + "\\" + find_file_ret_val;
+		find_board = true;
+	}	
+	find_file_ret_val = Utils::find_path(dir_path + "\\*.attack-a");
+	if (find_file_ret_val != FILE_NOT_FOUND)
 	{
-		if (line.substr(line.find_last_of(".") + 1) == "sboard")
-		{
-			find_board = true;
-			file_board = line;
-		}
-		if (line.substr(line.find_last_of(".") + 1) == "attack-a")
-		{
-			find_a = true;
-			file_a = line;
-		}
-		if (line.substr(line.find_last_of(".") + 1) == "attack-b")
-		{
-			find_b = true;
-			file_b = line;
-		}
+		file_a = dir_path + "\\" + find_file_ret_val;
+		find_a = true;
 	}
-
+	find_file_ret_val = Utils::find_path(dir_path + "\\*.attack-b");
+	if (find_file_ret_val != FILE_NOT_FOUND)
+	{
+		file_b = dir_path + "\\" + find_file_ret_val;
+		find_b = true;
+	}			
 	string path = (argc == 1) ? "Working Directory" : argv[1];
 	if (!find_board)
 		cout << "Missing board file (*.sboard) looking in path: " << path << endl; //ReqPrnt
@@ -88,58 +129,16 @@ bool GameFromFileManager::initialize(int argc, char *argv[])
 		cout << "Missing attack file for player A (*.attack-a) looking in path: " << path << endl; //ReqPrnt
 	if (!find_b)
 		cout << "Missing attack file for player B (*.attack-b) looking in path: " << path << endl; //ReqPrnt
-
 	if (find_board && find_a && find_b)
 	{
-		// set board using file
-		if (argc == 1)
-		{
-			set_boards_sucess = brd.SetBoardFromFile((file_board).c_str());
-		}
-		else
-		{
-			set_boards_sucess = brd.SetBoardFromFile((string(argv[1]) + "\\" + file_board).c_str());
-			file_a = string(argv[1]) + "\\" + file_a;
-			file_b = string(argv[1]) + "\\" + file_b;
-		}
-		if(!set_boards_sucess)
-		{
-			std::cout << "Error while open board file" << std::endl;
-			return -1;
-		}
-		//DEBUG(*brd);
-		if (!Utils::get_quiet())
-			cout << brd << endl;
-
-		// find ships
-		this->findShips('A', players[PLAYER_A].ships);
-		this->findShips('B', players[PLAYER_B].ships);
-
-
-		// check board validity
-		if (!this->isValidBoard())
+		if (initialize_board(file_board) == false)
 			return false;
-		DEBUG("*** board is valid ***");
-
-		// printing coordinates of ships:
-		//this->printShipsCoordinates('A');
-		//this->printShipsCoordinates('B');
-		bool retVal = true;
-
-		players[0].algo = new BattleshipPlayerFromFile(); //TODO: create dll IAlgo!
-		players[0].algo->setBoard(nullptr, brd.getNumOfRows(), brd.getNumOfCols()); //TODO: create the board really!
-		retVal &= players[0].algo->init(file_a);
-		players[1].algo = new BattleshipPlayerFromFile();
-		players[1].algo->setBoard(nullptr, brd.getNumOfRows(), brd.getNumOfCols());
-		retVal &= players[1].algo->init(file_b);
-		return retVal;
+		return initialize_players(file_a, file_b);
 	}
 	return false;
 }
 
-/*
- *
- */
+
 GameFromFileManager::GameFromFileManager() : currPlayerInx(0),
 numOfPlayers(number_of_players), brd(Board())
 {
@@ -194,41 +193,59 @@ void GameFromFileManager::setPlayersBoards()
 	
 }
 
-bool GameFromFileManager::isValidBoard() const
+bool GameFromFileManager::validate_ships_shape(int player_id) const
 {
 	Ship::ship_type ship_types_A[4] = { Ship::ship_type::A_BOAT, Ship::ship_type::A_SATIL, Ship::ship_type::A_SUBMARINE, Ship::ship_type::A_DESTROYER };
 	Ship::ship_type ship_types_B[4] = { Ship::ship_type::B_BOAT, Ship::ship_type::B_SATIL, Ship::ship_type::B_SUBMARINE, Ship::ship_type::B_DESTROYER };
+	Ship::ship_type *ship_types;
+	if (player_id == PLAYER_A)
+		ship_types = ship_types_A;
+	else
+		ship_types = ship_types_B;
 	bool is_valid = true;
 	// validate shape of A ships
-	for(int i = 0 ; i < 4 ; i++)
-	{
-		for (vector<Ship>::const_iterator it = players[PLAYER_A].ships.begin(); it != players[PLAYER_A].ships.end(); ++it)
-		{
-			if (it->getType() == ship_types_A[i] && !it->getValid())
-			{
-				//Requirement print
-				cout << "Wrong size or shape for ship " << static_cast<char> (ship_types_A[i]) << " for player A" << endl;
-				is_valid = false;
-				break;
-			}
-		}
-	}
-
-	// validate shape of B ships
 	for (int i = 0; i < 4; i++)
 	{
-		for (vector<Ship>::const_iterator it = players[PLAYER_B].ships.begin(); it != players[PLAYER_B].ships.end(); ++it)
+		for (vector<Ship>::const_iterator it = players[player_id].ships.begin(); it != players[player_id].ships.end(); ++it)
 		{
-			if (it->getType() == ship_types_B[i] && !it->getValid())
+			if (it->getType() == ship_types[i] && !it->getValid())
 			{
 				//Requirement print
-				cout << "Wrong size or shape for ship " << static_cast<char> (ship_types_B[i]) << " for player B" << endl;
+				if (player_id == PLAYER_A)
+					cout << "Wrong size or shape for ship " << static_cast<char> (ship_types_A[i]) << " for player A" << endl;
+				else
+					cout << "Wrong size or shape for ship " << static_cast<char> (ship_types_B[i]) << " for player B" << endl;
 				is_valid = false;
 				break;
 			}
 		}
 	}
+	return is_valid;
+}
 
+bool GameFromFileManager::validate_no_adjacent_ships() const
+{
+	vector<Ship> all_ships;
+	all_ships.insert(all_ships.end(), players[PLAYER_A].ships.begin(), players[PLAYER_A].ships.end());
+	all_ships.insert(all_ships.end(), players[PLAYER_B].ships.begin(), players[PLAYER_B].ships.end());
+	for (int i = 0; i < static_cast<int>(all_ships.size()) - 1; i++)
+	{
+		for (unsigned int j = i + 1; j < all_ships.size(); j++)
+		{
+			if (all_ships[i].isAdjacentShips(all_ships[j]))
+			{
+				//Requirement print
+				cout << "Adjacent Ships on Board" << endl;
+				return false;
+			}
+		}
+	}
+	return true;
+}
+bool GameFromFileManager::isValidBoard() const
+{
+	// validate shape of ships
+	bool is_valid = validate_ships_shape(PLAYER_A) && validate_ships_shape(PLAYER_B);
 	// validate number of A ships
 	int num_of_a_ships = numOfValidShips('A');
 	if (num_of_a_ships > 5)
@@ -242,8 +259,7 @@ bool GameFromFileManager::isValidBoard() const
 		//Requirement print
 		cout << "Too few ships for player A" << endl;
 		is_valid = false;
-	}
-	
+	}	
 	// validate number of B ships
 	int num_of_b_ships = numOfValidShips('B');
 	if (num_of_b_ships > 5)
@@ -260,21 +276,7 @@ bool GameFromFileManager::isValidBoard() const
 	}
 
 	// validate no adjacent ships
-	vector<Ship> all_ships;
-	all_ships.insert(all_ships.end(), players[PLAYER_A].ships.begin(), players[PLAYER_A].ships.end());
-	all_ships.insert(all_ships.end(), players[PLAYER_B].ships.begin(), players[PLAYER_B].ships.end());
-	for (int i = 0; i < static_cast<int>(all_ships.size()) - 1; i++)
-	{
-		for (unsigned int j = i+1; j < all_ships.size(); j++)
-		{
-			if(all_ships[i].isAdjacentShips(all_ships[j]))
-			{
-				//Requirement print
-				cout << "Adjacent Ships on Board" << endl;
-				return false;
-			}
-		}
-	}	
+	is_valid &= validate_no_adjacent_ships();
 	return is_valid;
 }
 
@@ -300,12 +302,65 @@ bool GameFromFileManager::allSunk(const vector<Ship>& ships)
 	return true;
 }
 
+void GameFromFileManager::update_board_print(pair<int, int> attack) 
+{
+	Board& board = brd;
+	COORD hit_coord;
+	hit_coord.Y = attack.first;
+	hit_coord.X = attack.second;
+	if (board(attack.first, attack.second) == Board::SEA)
+		Utils::updateBoardPrint(hit_coord, Board::SEA);
+	else
+		Utils::updateBoardPrint(hit_coord, Utils::HIT_SIGN);
+}
+
+void GameFromFileManager::notify_players(int currPlayerInx, pair<int, int> attack, const Ship *shipPtr, bool is_hit) const
+{
+	if(is_hit)
+	{
+		players[PLAYER_A].algo->notifyOnAttackResult(currPlayerInx, attack.first,
+			attack.second, shipPtr->isSunk() ? AttackResult::Sink : AttackResult::Hit);
+		players[PLAYER_B].algo->notifyOnAttackResult(currPlayerInx, attack.first,
+			attack.second, shipPtr->isSunk() ? AttackResult::Sink : AttackResult::Hit);
+	}
+	else
+	{
+		players[PLAYER_A].algo->notifyOnAttackResult(currPlayerInx, attack.first,
+			attack.second, AttackResult::Miss);
+		players[PLAYER_B].algo->notifyOnAttackResult(currPlayerInx, attack.first,
+			attack.second, AttackResult::Miss);
+	}
+}
+
+void GameFromFileManager::mainLoopEndOfGamePrint() const
+{
+	if (allSunk(players[PLAYER_A].ships))
+		cout << "Player B won" << endl; //Requirement print
+	if (allSunk((players[PLAYER_B].ships)))
+		cout << "Player A won" << endl; //Requirement print
+	cout << "Points:" << endl; 	//Requirement print
+	cout << "Player A: " << players[PLAYER_A].score << endl; //Requirement print
+	cout << "Player B: " << players[PLAYER_B].score << endl; //Requirement print
+}
+void GameFromFileManager::make_hit(int currPlayerInx, pair<int, int> attack, bool is_self_hit)
+{
+	Ship *shipPtr = getShipAtCrd(attack.first, attack.second); //player hits itself
+	shipPtr->hitAt(attack.first, attack.second);
+	update_board_print(attack); //update board print				
+	if (shipPtr->isSunk()) //if ship sinks grant points to enemy
+	{
+		if (is_self_hit)
+			players[(currPlayerInx + 1) % 2].score += shipPtr->getScoreForSinking();
+		else
+			players[currPlayerInx].score += shipPtr->getScoreForSinking();
+	}
+	notify_players(currPlayerInx, attack, shipPtr);	// notify players			
+}
+
 void GameFromFileManager::mainLoop()
 {
 	Board& board = brd;
-
 	bool OutOfAttacks[2] = { false, false };
-
 	while (isGameOn(OutOfAttacks))
 	{
 		PlayerData& currPlayer = players[currPlayerInx];
@@ -316,102 +371,34 @@ void GameFromFileManager::mainLoop()
 			DEBUG("Points:");
 			DEBUG("Player A: " << players[PLAYER_A].score);
 			DEBUG("Player B: " << players[PLAYER_B].score);
-
-			if (attack.first == -1 && attack.second == -1)
+			if (attack.first == -1 && attack.second == -1) //no more attacks for this player
 			{
-				OutOfAttacks[currPlayerInx] = true;
-				//no more attacks for this player
+				OutOfAttacks[currPlayerInx] = true;				
 				currPlayerInx = (currPlayerInx + 1) % 2;
 				break;
 			}
 			if (board(attack.first, attack.second) == Board::SEA || getShipAtCrd(attack.first, attack.second)->isSunk())
-			{
-				//update board print
-				COORD hit_coord;
-				hit_coord.Y = attack.first;
-				hit_coord.X = attack.second;
-				if (board(attack.first, attack.second) == Board::SEA)
-					Utils::updateBoardPrintMiss(hit_coord, Board::SEA);
-				else
-					Utils::updateBoardPrintMiss(hit_coord,'X');
-				//notify players
-				players[PLAYER_A].algo->notifyOnAttackResult(currPlayerInx, attack.first,
-					attack.second, AttackResult::Miss);
-				players[PLAYER_B].algo->notifyOnAttackResult(currPlayerInx, attack.first,
-					attack.second, AttackResult::Miss);
-				
-				//nothing happens and the turn passes
-				currPlayerInx = (currPlayerInx + 1) % 2;
+			{				
+				update_board_print(attack); //update board print				
+				notify_players(currPlayerInx, attack, nullptr, false); //notify players				
+				currPlayerInx = (currPlayerInx + 1) % 2; //nothing happens and the turn passes
 				break;
 			}
 			else if (selfHit(currPlayer, attack))
 			{
-				//player hits itself
-				Ship *shipPtr = getShipAtCrd(attack.first, attack.second);
-				shipPtr->hitAt(attack.first, attack.second);
-
-
-				//update board print
-				COORD hit_coord;
-				hit_coord.Y = attack.first;
-				hit_coord.X = attack.second;
-				Utils::updateBoardPrintHit(hit_coord);
-
-
-				//if ship sinks grant points to enemy
-				if (shipPtr->isSunk())
-					players[(currPlayerInx + 1) % 2].score += shipPtr->getScoreForSinking();
-
-				// notify players
-				players[PLAYER_A].algo->notifyOnAttackResult(currPlayerInx, attack.first,
-					attack.second, shipPtr->isSunk() ? AttackResult::Sink : AttackResult::Hit);
-				players[PLAYER_B].algo->notifyOnAttackResult(currPlayerInx, attack.first,
-					attack.second, shipPtr->isSunk() ? AttackResult::Sink : AttackResult::Hit);
-				
-				//pass turn
-				currPlayerInx = (currPlayerInx + 1) % 2;
+				make_hit(currPlayerInx, attack, true);
+				currPlayerInx = (currPlayerInx + 1) % 2; //pass turn
 				break;
 			}
 			else
 			{
-				//player hits enemy
-				Ship *shipPtr = getShipAtCrd(attack.first, attack.second);
-				shipPtr->hitAt(attack.first, attack.second);
-
-				//update board print
-				COORD hit_coord;
-				hit_coord.Y = attack.first;
-				hit_coord.X = attack.second;
-				Utils::updateBoardPrintHit(hit_coord);
-
-				//if ship sinks grant points to player
-				if (shipPtr->isSunk())
-					players[currPlayerInx].score += shipPtr->getScoreForSinking();
-
-				//notify players
-				players[PLAYER_A].algo->notifyOnAttackResult(currPlayerInx, attack.first,
-					attack.second, shipPtr->isSunk() ? AttackResult::Sink : AttackResult::Hit);
-				players[PLAYER_B].algo->notifyOnAttackResult(currPlayerInx, attack.first,
-					attack.second, shipPtr->isSunk() ? AttackResult::Sink : AttackResult::Hit);
-
-
+				make_hit(currPlayerInx, attack);
 				if (!isGameOn(OutOfAttacks)) //which means this hit caused victory
 					break;
-
-				//else; next turn = no break
 			}
 		} while (true);
 	}
-
-	if (allSunk(players[PLAYER_A].ships))
-		cout << "Player B won" << endl; //Requirement print
-	if (allSunk((players[PLAYER_B].ships)))
-		cout << "Player A won" << endl; //Requirement print
-
-	//Requirement prints
-	cout << "Points:" << endl;
-	cout << "Player A: " << players[PLAYER_A].score << endl;
-	cout << "Player B: " << players[PLAYER_B].score << endl;
+	mainLoopEndOfGamePrint();
 }
 
 int GameFromFileManager::getNumOfPlayers() const
