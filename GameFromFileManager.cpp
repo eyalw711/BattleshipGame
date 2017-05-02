@@ -59,15 +59,57 @@ bool GameFromFileManager::initialize_board(string file_board)
 	return true;
 }
 
+string GameFromFileManager::find_attack_path(const string& path_expr_to_find, int player_id)
+{
+	WIN32_FIND_DATAA fileData;
+	HANDLE hFind;
+	string first_file, second_file; // lexiogrphic order
+	string retVal = "", tmp_str = "";
+	hFind = FindFirstFileA(path_expr_to_find.c_str(), &fileData);
+	if (hFind == INVALID_HANDLE_VALUE)
+	{
+		if (GetLastError() == ERROR_FILE_NOT_FOUND)
+			retVal = FILE_NOT_FOUND;
+		//else
+		//	retVal = ERROR_FINDING_PATH;
+	}
+
+	else
+	{
+		first_file = fileData.cFileName;
+		second_file = fileData.cFileName;
+		do
+		{
+			tmp_str = fileData.cFileName;
+			if (first_file.compare(tmp_str) > 0)
+			{
+				second_file = first_file;
+				first_file = tmp_str;
+			}
+			else if (second_file.compare(tmp_str) > 0 || first_file.compare(second_file) == 0)
+			{
+				second_file = tmp_str;
+			}
+
+		} while (FindNextFileA(hFind, &fileData));
+		if (player_id == PLAYER_A)
+			retVal = first_file;
+		else
+			retVal = second_file;
+		FindClose(hFind);
+	}
+	return retVal;
+}
+
 bool GameFromFileManager::initialize_players(string file_a, string file_b)
 {
 	bool retVal = true;
-	players[0].algo = new BattleshipPlayerFromFile(); //TODO: create dll IAlgo!
-	players[0].algo->setBoard(nullptr, brd.getNumOfRows(), brd.getNumOfCols()); //TODO: create the board really!
-	retVal &= players[0].algo->init(file_a);
-	players[1].algo = new BattleshipPlayerFromFile();
-	players[1].algo->setBoard(nullptr, brd.getNumOfRows(), brd.getNumOfCols());
-	retVal &= players[1].algo->init(file_b);
+	players[PLAYER_A].algo = new BattleshipPlayerFromFile(); //TODO: create dll IAlgo!
+	players[PLAYER_A].algo->setBoard(PLAYER_A, nullptr, brd.getNumOfRows(), brd.getNumOfCols()); //TODO: create the board really!
+	retVal &= players[PLAYER_A].algo->init(file_a);
+	players[PLAYER_B].algo = new BattleshipPlayerFromFile();
+	players[PLAYER_B].algo->setBoard(PLAYER_B, nullptr, brd.getNumOfRows(), brd.getNumOfCols());
+	retVal &= players[PLAYER_B].algo->init(file_b);
 
 	return retVal;
 }
@@ -110,13 +152,13 @@ bool GameFromFileManager::initialize(int argc, char *argv[])
 		file_board = dir_path + "\\" + find_file_ret_val;
 		find_board = true;
 	}	
-	find_file_ret_val = Utils::find_path(dir_path + "\\*.attack-a");
+	find_file_ret_val = find_attack_path(dir_path + "\\*.attack", PLAYER_A);
 	if (find_file_ret_val != FILE_NOT_FOUND)
 	{
 		file_a = dir_path + "\\" + find_file_ret_val;
 		find_a = true;
 	}
-	find_file_ret_val = Utils::find_path(dir_path + "\\*.attack-b");
+	find_file_ret_val = find_attack_path(dir_path + "\\*.attack", PLAYER_B);
 	if (find_file_ret_val != FILE_NOT_FOUND)
 	{
 		file_b = dir_path + "\\" + find_file_ret_val;
@@ -126,9 +168,9 @@ bool GameFromFileManager::initialize(int argc, char *argv[])
 	if (!find_board)
 		cout << "Missing board file (*.sboard) looking in path: " << path << endl; //ReqPrnt
 	if (!find_a)
-		cout << "Missing attack file for player A (*.attack-a) looking in path: " << path << endl; //ReqPrnt
+		cout << "Missing attack file for player A (*.attack) looking in path: " << path << endl; //ReqPrnt
 	if (!find_b)
-		cout << "Missing attack file for player B (*.attack-b) looking in path: " << path << endl; //ReqPrnt
+		cout << "Missing attack file for player B (*.attack) looking in path: " << path << endl; //ReqPrnt
 	if (find_board && find_a && find_b)
 	{
 		if (initialize_board(file_board) == false)

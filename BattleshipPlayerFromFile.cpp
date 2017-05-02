@@ -165,7 +165,7 @@ char BattleshipPlayerFromFile::getId() const
 }
 
 /* This function is my API to acquire my board. */
-void BattleshipPlayerFromFile::setBoard(const char ** board, int numRows, int numCols)
+void BattleshipPlayerFromFile::setBoard(int player, const char ** board, int numRows, int numCols)
 {
 	/*as a "BattleshipPlayerFromFile" I'm really stupid and nothing about the
 	 * board interests me other than the numRows and numCols*/

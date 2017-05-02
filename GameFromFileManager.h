@@ -36,23 +36,24 @@ public:
 
 	//-- manager logic
 	bool initialize(int argc, char *argv[]);
-	bool GameFromFileManager::initialize_board(string file_board);
-	bool GameFromFileManager::initialize_players(string file_a, string file_b);
-	pair<bool, string> GameFromFileManager::parse_command_line_arguments(int argc, char *argv[]);
-	bool GameFromFileManager::validate_ships_shape(int player_id) const;
-	bool GameFromFileManager::validate_no_adjacent_ships() const;
-	void GameFromFileManager::update_board_print(pair<int, int> attack);
-	void GameFromFileManager::notify_players(int currPlayerInx, pair<int, int> attack, const Ship *shipPtr, bool is_hit = true) const;
 	void GameFromFileManager::mainLoopEndOfGamePrint() const;
-	void GameFromFileManager::make_hit(int currPlayerInx, pair<int, int> attack, bool is_self_hit = false);
 	void mainLoop();
 	void GameFromFileManager::findShips(char user, vector<Ship>& ships); 
 	void revealSurroundings(int row, int col, char ship_type, Board &brd, vector<pair<int, int>> &coords);
 	void setPlayersBoards();
 
 	//-- utils
+	bool GameFromFileManager::initialize_board(string file_board);
+	bool GameFromFileManager::initialize_players(string file_a, string file_b);
+	bool GameFromFileManager::validate_ships_shape(int player_id) const;
+	bool GameFromFileManager::validate_no_adjacent_ships() const;
+	void GameFromFileManager::notify_players(int currPlayerInx, pair<int, int> attack, const Ship *shipPtr, bool is_hit = true) const;
+	void GameFromFileManager::make_hit(int currPlayerInx, pair<int, int> attack, bool is_self_hit = false);
 	void printShipsCoordinates(char user);
 	static bool allSunk(const vector<Ship>& ships);
+	void GameFromFileManager::update_board_print(pair<int, int> attack);
+	pair<bool, string> GameFromFileManager::parse_command_line_arguments(int argc, char *argv[]);
+	static string GameFromFileManager::find_attack_path(const string& path_expr_to_find, int player_id);
 	static const int number_of_players = 2;
 	static const int PLAYER_A = 0;
 	static const int PLAYER_B = 1;

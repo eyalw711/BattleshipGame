@@ -21,7 +21,7 @@ public:
 	bool loadAttacksFromFile();
 
 	/* This function is my API to get my board */
-	void setBoard(const char** board, int numRows, int numCols) override;
+	void setBoard(int player, const char** board, int numRows, int numCols) override;
 	
 	/* My API to ask my attack */
 	std::pair<int, int> attack() override; 
