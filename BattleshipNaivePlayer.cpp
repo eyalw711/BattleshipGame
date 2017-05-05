@@ -46,19 +46,16 @@ std::pair<int, int> BattleshipNaivePlayer::attack()
 {
 	bool should_attack = false;
 	int row, col;
-	int index = 0;
 	do
 	{
 		should_attack = should_attack_coord(current_coord.first, current_coord.second);
 		row = current_coord.first;
 		col = current_coord.second;
 		current_coord = brd.getNextCoord(current_coord.first, current_coord.second);
-		index++;
-	} while (!should_attack || index > 100);
+	} while (!should_attack);
+	
+	return make_pair(row, col);
 
-	if (should_attack)
-		return make_pair(row, col);
-	return make_pair(-1, -1);
 }
 
 void BattleshipNaivePlayer::notifyOnAttackResult(int player, int row, int col, AttackResult result)

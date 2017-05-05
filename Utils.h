@@ -55,7 +55,7 @@ class Utils
 		static void setcolor(WORD color);
 		static void setForeGroundColor(int ForeGroundColor);
 		static COORD GetConsoleCursorPosition(HANDLE hConsoleOutput);
-		static void Utils::updateBoardPrint(int player_color, COORD hit_coord, char current);
+		static void Utils::updateBoardPrint(int player_color, COORD hit_coord, char current, int hit_color);
 		static string find_path(const string& path_expr_to_find);
 		static void set_quiet(bool is_quiet);
 		static bool get_quiet();
