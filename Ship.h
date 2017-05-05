@@ -32,7 +32,9 @@ public:
 	
 	//-- queries
 	bool isAShip() const;
+	static bool Ship::isAShip(char c);
 	bool isBShip() const;
+	static bool Ship::isBShip(char c);
 	bool isSunk() const;
 	bool containsCoord(int row, int col) const;
 	bool Ship::isValidShip(const vector<pair<pair<int, int>, bool>>& coordinates, ship_type type);

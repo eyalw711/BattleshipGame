@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
 	 *  - manager finds the players' ships
 	 *  - manager initializes players
 	 */
-	bool success = manager.initialize(argc, argv);
+	bool success = manager.initialize_file_and_naive(argc, argv);
 	if (!success)
 		return -1;
 

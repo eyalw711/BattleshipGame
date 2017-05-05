@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <iso646.h>
+#include "BattleshipNaivePlayer.h"
 using namespace std;
 
 
@@ -44,8 +45,8 @@ bool GameFromFileManager::initialize_board(string file_board)
 		cout << brd << endl;
 
 	// find ships
-	this->findShips('A', players[PLAYER_A].ships);
-	this->findShips('B', players[PLAYER_B].ships);
+	this->brd.findShips(PLAYER_A, players[PLAYER_A].ships);
+	this->brd.findShips(PLAYER_B, players[PLAYER_B].ships);
 
 
 	// check board validity
@@ -104,15 +105,26 @@ string GameFromFileManager::find_attack_path(const string& path_expr_to_find, in
 bool GameFromFileManager::initialize_players(string file_a, string file_b)
 {
 	bool retVal = true;
+	const char** boardA = getBoardOfPlayer(PLAYER_A);
+	const char** boardB = getBoardOfPlayer(PLAYER_B);
 	players[PLAYER_A].algo = new BattleshipPlayerFromFile(); //TODO: create dll IAlgo!
-	players[PLAYER_A].algo->setBoard(PLAYER_A, nullptr, brd.getNumOfRows(), brd.getNumOfCols()); //TODO: create the board really!
+	players[PLAYER_A].algo->setBoard(PLAYER_A, boardA, brd.getNumOfRows(), brd.getNumOfCols()); //TODO: create the board really!
 	retVal &= players[PLAYER_A].algo->init(file_a);
-	players[PLAYER_B].algo = new BattleshipPlayerFromFile();
-	players[PLAYER_B].algo->setBoard(PLAYER_B, nullptr, brd.getNumOfRows(), brd.getNumOfCols());
+	players[PLAYER_B].algo = new BattleshipNaivePlayer();
+	players[PLAYER_B].algo->setBoard(PLAYER_B, boardB, brd.getNumOfRows(), brd.getNumOfCols());
 	retVal &= players[PLAYER_B].algo->init(file_b);
+
+	// cleanup
+	for (int i = 0; i < brd.getNumOfRows(); i++)
+		delete[] boardA[i];
+	delete[] boardA;
+	for (int i = 0; i < brd.getNumOfRows(); i++)
+		delete[] boardB[i];
+	delete[] boardB;
 
 	return retVal;
 }
+
 
 pair<bool, string> GameFromFileManager::parse_command_line_arguments(int argc, char *argv[])
 {
@@ -168,10 +180,46 @@ bool GameFromFileManager::initialize(int argc, char *argv[])
 	if (!find_board)
 		cout << "Missing board file (*.sboard) looking in path: " << path << endl; //ReqPrnt
 	if (!find_a)
-		cout << "Missing attack file for player A (*.attack) looking in path: " << path << endl; //ReqPrnt
+		cout << "Missing attack file for player A (*.attack-a) looking in path: " << path << endl; //ReqPrnt
 	if (!find_b)
-		cout << "Missing attack file for player B (*.attack) looking in path: " << path << endl; //ReqPrnt
+		cout << "Missing attack file for player B (*.attack-b) looking in path: " << path << endl; //ReqPrnt
 	if (find_board && find_a && find_b)
+	{
+		if (initialize_board(file_board) == false)
+			return false;
+		return initialize_players(file_a, file_b);
+	}
+	return false;
+}
+
+bool GameFromFileManager::initialize_file_and_naive(int argc, char *argv[])
+{
+	bool find_board = false, find_a = false, find_b = false;
+	string dir_path = ".", file_board, file_a = "", file_b = "", find_file_ret_val;
+	pair<bool, string> parser_ret_val = parse_command_line_arguments(argc, argv);
+	dir_path = parser_ret_val.second;
+	if (parser_ret_val.first == false)
+		return false;
+	/* find files */
+	find_file_ret_val = Utils::find_path(dir_path + "\\*.sboard");
+	if (find_file_ret_val != FILE_NOT_FOUND)
+	{
+		file_board = dir_path + "\\" + find_file_ret_val;
+		find_board = true;
+	}
+	find_file_ret_val = find_attack_path(dir_path + "\\*.attack", PLAYER_A);
+	if (find_file_ret_val != FILE_NOT_FOUND)
+	{
+		file_a = dir_path + "\\" + find_file_ret_val;
+		find_a = true;
+	}
+	string path = (argc == 1) ? "Working Directory" : argv[1];
+	if (!find_board)
+		cout << "Missing board file (*.sboard) looking in path: " << path << endl; //ReqPrnt
+	if (!find_a)
+		cout << "Missing attack file for player A (*.attack-a) looking in path: " << path << endl; //ReqPrnt
+
+	if (find_board && find_a)
 	{
 		if (initialize_board(file_board) == false)
 			return false;
@@ -196,10 +244,11 @@ numOfPlayers(number_of_players), brd(Board())
 	player1.algo = nullptr;
 	player2.algo = nullptr;
 
-	players[PLAYER_A] = player1;
-	players[PLAYER_B] = player2;
+	player1.color = Utils::MAGNETA_COLOR;
+	player2.color = Utils::GREEN_COLOR;
 
-	
+	players[PLAYER_A] = player1;
+	players[PLAYER_B] = player2;	
 }
 
 GameFromFileManager::~GameFromFileManager()
@@ -344,16 +393,16 @@ bool GameFromFileManager::allSunk(const vector<Ship>& ships)
 	return true;
 }
 
-void GameFromFileManager::update_board_print(pair<int, int> attack) 
+void GameFromFileManager::update_board_print(int player_color, pair<int, int> attack)
 {
 	Board& board = brd;
 	COORD hit_coord;
 	hit_coord.Y = attack.first;
 	hit_coord.X = attack.second;
 	if (board(attack.first, attack.second) == Board::SEA)
-		Utils::updateBoardPrint(hit_coord, Board::SEA);
+		Utils::updateBoardPrint(player_color, hit_coord, Board::SEA);
 	else
-		Utils::updateBoardPrint(hit_coord, Utils::HIT_SIGN);
+		Utils::updateBoardPrint(player_color, hit_coord, Utils::HIT_SIGN);
 }
 
 void GameFromFileManager::notify_players(int currPlayerInx, pair<int, int> attack, const Ship *shipPtr, bool is_hit) const
@@ -388,7 +437,7 @@ void GameFromFileManager::make_hit(int currPlayerInx, pair<int, int> attack, boo
 {
 	Ship *shipPtr = getShipAtCrd(attack.first, attack.second); //player hits itself
 	shipPtr->hitAt(attack.first, attack.second);
-	update_board_print(attack); //update board print				
+	update_board_print(players[(currPlayerInx + 1) % 2].color, attack); //update board print				
 	if (shipPtr->isSunk()) //if ship sinks grant points to enemy
 	{
 		if (is_self_hit)
@@ -421,7 +470,7 @@ void GameFromFileManager::mainLoop()
 			}
 			if (board(attack.first, attack.second) == Board::SEA || getShipAtCrd(attack.first, attack.second)->isSunk())
 			{				
-				update_board_print(attack); //update board print				
+				update_board_print(players[(currPlayerInx + 1) % 2].color, attack); //update board print			
 				notify_players(currPlayerInx, attack, nullptr, false); //notify players				
 				currPlayerInx = (currPlayerInx + 1) % 2; //nothing happens and the turn passes
 				break;
@@ -483,7 +532,7 @@ Ship *GameFromFileManager::getShipAtCrd(int row, int col)
 	return nullptr;
 }
 
-void GameFromFileManager::revealSurroundings(int row, int col, char ship_char, Board &board, vector<pair<int, int>> &coords)
+/*void GameFromFileManager::revealSurroundings(int row, int col, char ship_char, Board &board, vector<pair<int, int>> &coords)
 {
 	if (board(row, col) == ship_char)
 	{
@@ -520,7 +569,7 @@ void GameFromFileManager::findShips(char user, vector<Ship>& ships)
 		}
 	}
 
-}
+}*/
 
 
 void GameFromFileManager::printShipsCoordinates(char user)
@@ -535,4 +584,28 @@ void GameFromFileManager::printShipsCoordinates(char user)
 	}
 }
 
+// this function works only for 10X10 boards
+// the board that is alocated here should be freed
+const char** GameFromFileManager::getBoardOfPlayer(int player_id)
+{
+	const int rows = Board::DEFAULT_BOARD_WIDTH;
+	const int cols = Board::DEFAULT_BOARD_WIDTH;
+	const char **board = new const char*[rows];
+	for (int row = 0; row < rows; row++)
+	{
+		char *row_chars = new char[10];
+		for (int col = 0; col < cols; col++)
+		{
+			if ((player_id == PLAYER_A and Board::isBShip(brd(row + 1, col + 1))) or
+				(player_id == PLAYER_B and Board::isAShip(brd(row + 1, col + 1))))
+				row_chars[col] = Board::SEA;
+			else
+				row_chars[col] = brd(row + 1, col + 1);
+		}
+		board[row] = row_chars;		
+	}
+	return board;
+
+
+}
 

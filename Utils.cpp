@@ -42,7 +42,7 @@ COORD Utils::GetConsoleCursorPosition(HANDLE hConsoleOutput)
 	}
 }
 
-void Utils::updateBoardPrint(COORD hit_coord, char current)
+void Utils::updateBoardPrint(int player_color, COORD hit_coord, char current)
 {
 	if (!Utils::QUIET)
 	{
@@ -50,13 +50,13 @@ void Utils::updateBoardPrint(COORD hit_coord, char current)
 		HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
 		COORD cursor_coord = GetConsoleCursorPosition(h);
 		gotoxy(PRINT_INDENT + hit_coord.X * 2 - 2, hit_coord.Y);
-		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), RED_COLOR); cout << "@";
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), player_color); cout << "@";
 		gotoxy(PRINT_INDENT + hit_coord.X * 2 - 2, hit_coord.Y);
 		std::this_thread::sleep_for(std::chrono::milliseconds(DEFAULT_START_ANIMATION_DELAY));
-		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), RED_COLOR); cout << " ";
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), player_color); cout << " ";
 		gotoxy(PRINT_INDENT + hit_coord.X * 2 - 2, hit_coord.Y);
 		std::this_thread::sleep_for(std::chrono::milliseconds(DEFAULT_END_ANIMATION_DELAY));
-		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), RED_COLOR); cout << current;
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), player_color); cout << current;
 		gotoxy(cursor_coord.X, cursor_coord.Y);
 		setcolor(WHITE_COLOR);
 	}

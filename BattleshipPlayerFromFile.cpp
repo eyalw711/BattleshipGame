@@ -13,7 +13,7 @@ BattleshipPlayerFromFile::BattleshipPlayerFromFile() :
 {
 }
 
-bool BattleshipPlayerFromFile::init(const std::string& path)
+bool BattleshipPlayerFromFile::init(const std::string& path) //TODO: change it according to clarifications in the moodle
 {
 	pathToAttacksFile = path;
 	return loadAttacksFromFile();
@@ -159,10 +159,6 @@ void BattleshipPlayerFromFile::notifyOnAttackResult(int player, int row, int col
 	return;
 }
 
-char BattleshipPlayerFromFile::getId() const
-{
-	return Id;
-}
 
 /* This function is my API to acquire my board. */
 void BattleshipPlayerFromFile::setBoard(int player, const char ** board, int numRows, int numCols)

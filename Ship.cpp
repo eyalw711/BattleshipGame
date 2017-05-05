@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Ship.h"
 #include <iostream>
+#include <iso646.h>
 
 
 Ship::Ship()
@@ -98,6 +99,15 @@ bool Ship::isAShip() const
 	}
 	return false;
 }
+
+bool Ship::isAShip(char c)
+{
+	return (c == static_cast<char>(ship_type::A_BOAT) or
+		c == static_cast<char>(ship_type::A_SATIL) or
+		c == static_cast<char>(ship_type::A_SUBMARINE) or
+		c == static_cast<char>(ship_type::A_DESTROYER));
+		
+}
 bool Ship::isBShip() const
 {
 	if (type == ship_type::B_BOAT || type == ship_type::B_SATIL ||
@@ -107,6 +117,14 @@ bool Ship::isBShip() const
 	}
 	return false;
 }
+bool Ship::isBShip(char c)
+{
+	return (c == static_cast<char>(ship_type::B_BOAT) or
+		c == static_cast<char>(ship_type::B_SATIL) or
+		c == static_cast<char>(ship_type::B_SUBMARINE) or
+		c == static_cast<char>(ship_type::B_DESTROYER));
+}
+
 
 int Ship::getSizeOfShipType(Ship::ship_type type)
 {

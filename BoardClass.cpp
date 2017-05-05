@@ -4,6 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <iso646.h>
+#include "Utils.h"
 
 
 using namespace std;
@@ -48,6 +49,18 @@ Board::Board(int rows, int columns) : rows_(rows), columns_(columns), data_(new 
 {
 	DEBUG("non-default Board ctor activated - board with only spaces created");
 	memset(data_, ' ', rows*columns);
+}
+
+Board::Board(const char** board, int rows, int columns) : rows_(rows), columns_(columns), data_(new char[rows * columns])
+{
+	DEBUG("non-default Board ctor activated");
+	for (int i = 1; i <= rows; i++)
+	{
+		for (int j = 1; j <= columns; j++)
+		{
+			setSlot(i , j, board[i-1][j-1]);
+		}
+	}
 }
 
 
@@ -148,11 +161,11 @@ bool Board::isLegalBoardElement(char marineObject)
 }
 
 //user should be 'A' or 'B'
-bool Board::isUserShip(char user, char marineObject)
+bool Board::isUserShip(int user_id, char marineObject)
 {
-	if (user == 'A')
+	if (user_id == PLAYER_A)
 		return isAShip(marineObject);
-	else if (user == 'B')
+	else if (user_id == PLAYER_B)
 		return isBShip(marineObject);
 	else
 		throw std::logic_error("Invalid User");
@@ -220,7 +233,7 @@ int Board::getNumOfCols() const
 	return columns_;
 }
 
-bool Board::isInBoard(int row, int col)
+bool Board::isInBoard(int row, int col) const
 {
 	if (row >=1 and row <= rows_ and col >= 1 and col <= columns_)
 		return true;
@@ -243,10 +256,69 @@ std::ostream& operator<<(std::ostream &strm, const Board &brd) {
 			strm << i << "   ";
 		for(int j = 1; j <= brd.columns_; j++)
 		{
+			if (Board::isAShip(brd(i, j)))
+				Utils::setcolor(Utils::MAGNETA_COLOR);
+			else if(Board::isBShip(brd(i, j)))
+				Utils::setcolor(Utils::GREEN_COLOR);
 			strm << brd(i,j) << " ";
+			Utils::setcolor(Utils::WHITE_COLOR);
 		}
 		strm << endl;
 	}
 	return strm;
 }
 
+
+
+void Board::revealSurroundings(int row, int col, char ship_char, Board &board, vector<pair<int, int>> &coords) const
+{
+	if (board(row, col) == ship_char)
+	{
+		board.setSlot(row, col, Board::SEA);
+		coords.push_back(make_pair(row, col));
+		int rows[2] = { row + 1, row - 1 };
+		int cols[2] = { col + 1, col - 1 };
+		for (int i = 0; i < 2; i++)
+		{
+			if (board.isInBoard(row, cols[i]))
+				revealSurroundings(row, cols[i], ship_char, board, coords);
+			if (board.isInBoard(rows[i], col))
+				revealSurroundings(rows[i], col, ship_char, board, coords);
+		}
+	}
+}
+
+
+void Board::findShips(int player_id, vector<Ship>& ships) const
+{
+	Board copiedBoard(*this);
+	for (int i = 1; i <= copiedBoard.getNumOfRows(); i++)
+	{
+		for (int j = 1; j <= copiedBoard.getNumOfCols(); j++)
+		{
+			if (Board::isUserShip(player_id, copiedBoard(i, j))) //if ship found
+			{
+				vector<pair<int, int>> coords = vector<pair<int, int>>();
+				char ship_char = copiedBoard(i, j);
+				Ship::ship_type ship_type = static_cast<Ship::ship_type>(copiedBoard(i, j));
+				revealSurroundings(i, j, ship_char, copiedBoard, coords);
+				ships.push_back(Ship(ship_type, &coords));
+			}
+		}
+	}
+
+}
+
+pair<int,int> Board::getNextCoord(int row, int col) const
+{
+	if (row == this->rows_ && col == this->columns_)
+		return make_pair(1, 1);
+	if (col == this->columns_)
+		return make_pair(row + 1, 1);
+	return make_pair(row, col + 1);
+}
+
+const char* Board::getData() const
+{
+	return data_;
+}

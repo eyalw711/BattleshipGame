@@ -20,21 +20,26 @@ public:
 	static const char B_SUBMARINE	= 'm';
 	static const char B_DESTROYER	= 'd';
 
+	static const int PLAYER_A = 0;
+	static const int PLAYER_B = 1;
+
 	static const int DEFAULT_BOARD_WIDTH = 10;
 
 	Board() : Board(DEFAULT_BOARD_WIDTH, DEFAULT_BOARD_WIDTH) {}//empty constructor
 	Board(int rows, int columns); //non-default
+	Board(const char** board, int rows, int columns); //non-default2
 	Board(const Board&); //copy ctor
 	Board& operator=(const Board&);
 	char operator()(int, int) const;
 	friend std::ostream& operator<<(std::ostream &strm, const Board &brd);
 	~Board();
 
+	void Board::revealSurroundings(int row, int col, char ship_char, Board &board, vector<pair<int, int>> &coords) const;
+	void Board::findShips(int player_id, vector<Ship>& ships) const;
 
-
-	bool isInBoard(int row, int col);
+	bool Board::isInBoard(int row, int col) const;
 	static bool isLegalBoardElement(char c);
-	static bool isUserShip(char user, char marineObject);
+	static bool Board::isUserShip(int user_id, char marineObject);
 	static bool isAShip(char marineObject);
 	static bool isBShip(char marineObject);
 
@@ -43,6 +48,9 @@ public:
 
 	int getNumOfRows() const;
 	int getNumOfCols() const;
+	const char* Board::getData() const;
+
+	pair<int, int> Board::getNextCoord(int row, int col) const;
 
 private:
 	int rows_;
