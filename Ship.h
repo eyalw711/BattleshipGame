@@ -2,6 +2,9 @@
 #include <utility>
 #include <vector>
 
+// Forward declaration for Board Class
+class Board;
+
 
 using namespace std;
 class Ship
@@ -44,6 +47,7 @@ public:
 	//-- getters
 	static int getSizeOfShipType(Ship::ship_type type);
 	const vector<pair<pair<int, int>, bool>>& Ship::getCoordinates() const;
+    const vector<pair<int, int>>& getAdjacentCoordinates(const Board& brd) const;
 	static int getRow(vector<pair<pair<int, int>, bool>>::const_reference pair);
 	static int getCol(vector<pair<pair<int, int>, bool>>::const_reference pair);
 	int getScoreForSinking() const;

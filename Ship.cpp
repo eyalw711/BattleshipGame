@@ -2,7 +2,9 @@
 #include "Ship.h"
 #include <iostream>
 #include <iso646.h>
-
+#include <set>
+#include <math.h>
+#include "BoardClass.h"
 
 Ship::Ship()
 {
@@ -176,6 +178,35 @@ bool Ship::isValidShip(const vector<pair<pair<int, int>, bool>>& coordinates, sh
 const vector<pair<pair<int, int>, bool>>& Ship::getCoordinates() const
 {
 	return coordinates;
+}
+
+const vector<pair<int, int>>& Ship::getAdjacentCoordinates(const Board& brd) const
+{
+    auto coordsSet = set<pair<int, int>>(coordinates.begin(), coordinates.end());
+    auto adjacents = set<pair<int, int >>();
+    for (auto const& crd : coordsSet)
+    {
+        for (int k = 0; k < 4; k++)
+        {
+            int i = (k % 2 == 0) ? k - 1 : 0;
+            int j = (k % 2 == 0) ? 0 : k - 2;
+
+            /* Truth table for convenience:
+             * k    i   j
+             * 0    -1  0
+             * 1    0   -1
+             * 2    1   0
+             * 3    0   1
+             */
+            auto currCrd = make_pair(crd.first + i, crd.second + j);
+
+            //continue if currCrd is either not in board or a part of the ship itself
+            if (!brd.isInBoard(currCrd) || coordsSet.count(currCrd) == 1)
+                continue;
+            adjacents.insert(currCrd);
+        }
+    }
+    return vector <pair<int, int>>(adjacents.begin(), adjacents.end());
 }
 
 Ship::Ship(ship_type type, vector<pair<int, int>> *coordinates_only) :type(type), coordinates(vector<pair<pair<int, int>, bool>>())

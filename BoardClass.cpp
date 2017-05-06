@@ -240,6 +240,11 @@ bool Board::isInBoard(int row, int col) const
 	return false;
 }
 
+bool Board::isInBoard(pair<int, int> crd) const
+{
+    return isInBoard(crd.first, crd.second);
+}
+
 
 std::ostream& operator<<(std::ostream &strm, const Board &brd) {
 	// making columns

@@ -1,7 +1,10 @@
 #include "stdafx.h"
 #include "BattleshipNaivePlayer.h"
 
-BattleshipNaivePlayer::BattleshipNaivePlayer() : brd(Board()),ships(vector<Ship>()),current_coord(pair<int,int>(1,1))
+BattleshipNaivePlayer::BattleshipNaivePlayer() : 
+    brd(Board()),
+    ships(vector<Ship>()),
+    current_coord(pair<int,int>(1,1))
 {
 }
 

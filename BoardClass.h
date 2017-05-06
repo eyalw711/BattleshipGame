@@ -38,6 +38,8 @@ public:
 	void Board::findShips(int player_id, vector<Ship>& ships) const;
 
 	bool Board::isInBoard(int row, int col) const;
+    bool Board::isInBoard(pair<int,int> crd) const;
+
 	static bool isLegalBoardElement(char c);
 	static bool Board::isUserShip(int user_id, char marineObject);
 	static bool isAShip(char marineObject);
@@ -56,9 +58,5 @@ private:
 	int rows_;
 	int columns_;
 	char *data_;
-
-
-
-
 
 };
