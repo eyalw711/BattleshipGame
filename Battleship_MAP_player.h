@@ -69,11 +69,15 @@ private:
     *******************/
     void notifyAttackMiss(int row, int col);
     void notifyAttackHit(int row, int col);
+
+    bool initDestroyModeRightAfterSink_innerLoop_isChanged();
     void initDestroyModeRightAfterSink();
+
     void notifyAttackSink(int row, int col);
     void notifyOpponentAttackHit(int row, int col);
     void notifyOpponentAttackSink(int row, int col);
 
+    pair<int, int> detectNotifiedSunkShip_innerLoop(bool* is_inner_loop_changed, vector<pair<int,int>>& detected);
     vector<pair<int,int>> detectNotifiedSunkShip(int row, int col);
 
     void initObstacles();

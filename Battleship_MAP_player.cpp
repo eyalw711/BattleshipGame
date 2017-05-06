@@ -3,12 +3,12 @@
 #include <set>
 #include <exception>
 #include <ctime>
+#include <iso646.h>
 
 
 /** TODO List:
- *  1. every place where you iterate over something and erasing elements
- *      int the same time - fix your solution!
- *  2. I hope (1) will fix the build
+ *  1. fix ctor
+ *  2. finish implementation of all methods
  */
 
 /*************************************
@@ -99,34 +99,32 @@ void Battleship_MAP_player::notifyAttackHit(int row, int col)
     }
 }
 
+bool Battleship_MAP_player::initDestroyModeRightAfterSink_innerLoop_isChanged()
+{
+    for (auto const& crd : destroySession)
+    {
+        for (auto it_possibly_adjacent_crd = uncompleteHitSpots.begin(); it_possibly_adjacent_crd != uncompleteHitSpots.end(); )
+        {
+            if (Ship::isAdjacentCoordinates(*it_possibly_adjacent_crd, crd))
+            {
+                destroySession.push_back(*it_possibly_adjacent_crd);
+                it_possibly_adjacent_crd = uncompleteHitSpots.erase(it_possibly_adjacent_crd);
+                return true;
+            }
+            ++it_possibly_adjacent_crd;
+        }
+    }
+    return false;
+}
+
 void Battleship_MAP_player::initDestroyModeRightAfterSink()
 {
     auto new_destroy_core = *(uncompleteHitSpots.begin());
     destroySession.push_back(new_destroy_core);
     uncompleteHitSpots.erase(new_destroy_core);
-    while (true)
-    {
-        try
-        {
-            for (auto const& crd : destroySession)
-            {
-                for (auto const& possibly_adj_crd : uncompleteHitSpots)
-                {
-                    if (Ship::isAdjacentCoordinates(crd, possibly_adj_crd))
-                    {
-                        destroySession.push_back(possibly_adj_crd);
-                        uncompleteHitSpots.erase(possibly_adj_crd);
-                        throw true;
-                    }
-                }
-            }
-            throw false;
-        }
-        catch (boolean isChanged)
-        {
-            if (!isChanged)
-                break;
-        }
+    while (initDestroyModeRightAfterSink_innerLoop_isChanged()) 
+    {   //this loop takes all adjacents to new_destroy_core from
+        //uncompleteHitSpots to destroySession
     }
 }
 
@@ -167,28 +165,29 @@ void Battleship_MAP_player::notifyOpponentAttackHit(int row, int col)
                 if (Ship::isAdjacentCoordinates(make_pair(row, col), crd))
                 {
                     //helps me in my destroy mode:
-                    destroySession.push_back(make_pair(row, col));
                     helps_me_in_destroy_mode = true;
                     break;
                 }
             }
             if (!helps_me_in_destroy_mode)
                 uncompleteHitSpots.insert(make_pair(row, col));
+            else
+                destroySession.push_back(make_pair(row, col));
         }
     }
 }
 
 void Battleship_MAP_player::notifyOpponentAttackSink(int row, int col)
 {
+    auto sinkCrd = make_pair(row, col);
     if (!myShipAt(row, col)) // nice! the opponent sink itself!
     {
         bool helps_me_in_destroy_mode = false;
         for (auto const& crd : destroySession)
         {
-            if (Ship::isAdjacentCoordinates(make_pair(row, col), crd))
+            if (Ship::isAdjacentCoordinates(sinkCrd, crd))
             {
                 //helps me in my destroy mode:
-                destroySession.push_back(make_pair(row, col));
                 helps_me_in_destroy_mode = true;
                 break;
             }
@@ -196,26 +195,62 @@ void Battleship_MAP_player::notifyOpponentAttackSink(int row, int col)
         if (helps_me_in_destroy_mode)
         { //sets all destroy session coords to obstacles, turns on seek mode (or destroy),
           //and clears destroySession.
+            destroySession.push_back(sinkCrd);
             notifyAttackSink(row, col);
         }
         else
         { // either I can find adjacents in uncompleteHitSpots or it was a 1 coord ship.
-            auto shipCrds = detectNotifiedSunkShip(row, col);
-            if (shipCrds.size() != 1) // sunk something from uncompleteHitSpots
+            auto shipCrds = detectNotifiedSunkShip(row, col); //removes from uncompleteHitSpots too
+            /*if (shipCrds.size() != 1) // sunk something from uncompleteHitSpots
             {
                  for (auto const& crd : shipCrds)
                      uncompleteHitSpots.erase(crd);
-            }
+            }*/
             for (auto const& crd : shipCrds)
                 obstacles.setCoord(crd, 1);
         }
     }
 }
 
+pair<int, int> Battleship_MAP_player::detectNotifiedSunkShip_innerLoop(
+    bool* is_inner_loop_changed,
+    vector<pair<int, int>>& detected
+)
+{
+    for (auto const& crd : detected)
+    {
+        for (auto const& possibly_adjacent_crd : uncompleteHitSpots)
+        {
+            if (Ship::isAdjacentCoordinates(crd, possibly_adjacent_crd))
+            {
+                uncompleteHitSpots.erase(possibly_adjacent_crd);
+                *is_inner_loop_changed = true;
+                return possibly_adjacent_crd;
+            }
+        }
+    }
+    *is_inner_loop_changed = false;
+    return make_pair(-1, -1);
+}
+
+/**
+ * \brief: this method should be called
+ * after the enemy sunk its own ship.
+ * the function discovers the coords of the ship
+ * in uncompleteHitSpots and returns them.
+ */
 vector<pair<int, int>> Battleship_MAP_player::detectNotifiedSunkShip(int row, int col)
 {
-    throw new exception("Unimplemented");
-    return vector<pair<int, int>>();
+    bool isInnerLoopChanged = false;
+    auto detectedCrds = vector<pair<int, int>>();
+    detectedCrds.push_back(make_pair(row, col));
+    do
+    {
+        pair<int, int> newCrd = detectNotifiedSunkShip_innerLoop(&isInnerLoopChanged, detectedCrds);
+        if (newCrd.first != -1 and newCrd.second != -1)
+            detectedCrds.push_back(newCrd);
+    } while (isInnerLoopChanged);
+    return detectedCrds;
 }
 
 void Battleship_MAP_player::notifyOnAttackResult(
@@ -292,7 +327,7 @@ void Battleship_MAP_player::seekHeat_addHeat_tryShipSizes(HeatMap& seekHeatMap, 
         {
             if (obstacles(crd) == 1)
                 // if reached obstacle, we'll reach obstacle in all following shipSizes.
-                throw false;
+                return;
         }
 
         // if here means no obstacles:
@@ -322,15 +357,7 @@ HeatMap Battleship_MAP_player::computeSeekHeat() const
 
             for (int orientation = 0; orientation < 2; orientation++)
             {
-                try //enables us to exit following function call immediately using throw
-                {
-                    seekHeat_addHeat_tryShipSizes(seekHeatMapRef, i, j, orientation);
-                }
-                catch (bool b)
-                {
-                    // got to a ship too long to fit
-                    // and got out immediately
-                }
+                seekHeat_addHeat_tryShipSizes(seekHeatMapRef, i, j, orientation);
             }
         }
     }

@@ -180,9 +180,20 @@ const vector<pair<pair<int, int>, bool>>& Ship::getCoordinates() const
 	return coordinates;
 }
 
-const vector<pair<int, int>>& Ship::getAdjacentCoordinates(const Board& brd) const
+vector<pair<int, int>> Ship::getOnlyCoords() const
 {
-    auto coordsSet = set<pair<int, int>>(coordinates.begin(), coordinates.end());
+    auto onlyCrds = vector<pair<int, int>>();
+    for (auto const& crdHitPair : coordinates)
+    {
+        onlyCrds.push_back(crdHitPair.first);
+    }
+    return onlyCrds;
+}
+
+vector<pair<int, int>> Ship::getAdjacentCoordinates(const Board& brd) const
+{
+    auto onlyCrds = getOnlyCoords();
+    auto coordsSet = set<pair<int, int>>(onlyCrds.begin(), onlyCrds.end());
     auto adjacents = set<pair<int, int >>();
     for (auto const& crd : coordsSet)
     {
