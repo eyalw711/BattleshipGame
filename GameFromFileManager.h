@@ -54,7 +54,7 @@ public:
 	void GameFromFileManager::make_hit(int currPlayerInx, pair<int, int> attack, bool is_self_hit = false);
 	void printShipsCoordinates(char user);
 	static bool allSunk(const vector<Ship>& ships);
-	void GameFromFileManager::update_board_print(int player_color, pair<int, int> attack);
+	void GameFromFileManager::update_board_print(int player_color, pair<int, int> attack, int hit_color);
 	pair<bool, string> GameFromFileManager::parse_command_line_arguments(int argc, char *argv[]);
 	static string GameFromFileManager::find_attack_path(const string& path_expr_to_find, int player_id);
 	static const int number_of_players = 2;

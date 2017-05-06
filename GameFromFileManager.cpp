@@ -393,16 +393,16 @@ bool GameFromFileManager::allSunk(const vector<Ship>& ships)
 	return true;
 }
 
-void GameFromFileManager::update_board_print(int player_color, pair<int, int> attack)
+void GameFromFileManager::update_board_print(int player_color, pair<int, int> attack, int hit_color)
 {
 	Board& board = brd;
 	COORD hit_coord;
 	hit_coord.Y = attack.first;
 	hit_coord.X = attack.second;
 	if (board(attack.first, attack.second) == Board::SEA)
-		Utils::updateBoardPrint(player_color, hit_coord, Board::SEA);
+		Utils::updateBoardPrint(player_color, hit_coord, Board::SEA, hit_color);
 	else
-		Utils::updateBoardPrint(player_color, hit_coord, Utils::HIT_SIGN);
+		Utils::updateBoardPrint(player_color, hit_coord, Utils::HIT_SIGN, hit_color);
 }
 
 void GameFromFileManager::notify_players(int currPlayerInx, pair<int, int> attack, const Ship *shipPtr, bool is_hit) const
@@ -437,7 +437,7 @@ void GameFromFileManager::make_hit(int currPlayerInx, pair<int, int> attack, boo
 {
 	Ship *shipPtr = getShipAtCrd(attack.first, attack.second); //player hits itself
 	shipPtr->hitAt(attack.first, attack.second);
-	update_board_print(players[(currPlayerInx + 1) % 2].color, attack); //update board print				
+	update_board_print(players[currPlayerInx % 2].color, attack, is_self_hit ? players[currPlayerInx % 2].color: players[(currPlayerInx + 1) % 2].color); //update board print				
 	if (shipPtr->isSunk()) //if ship sinks grant points to enemy
 	{
 		if (is_self_hit)
@@ -469,8 +469,9 @@ void GameFromFileManager::mainLoop()
 				break;
 			}
 			if (board(attack.first, attack.second) == Board::SEA || getShipAtCrd(attack.first, attack.second)->isSunk())
-			{				
-				update_board_print(players[(currPlayerInx + 1) % 2].color, attack); //update board print			
+			{	
+				int hit_color = board(attack.first, attack.second) == Board::SEA || getShipAtCrd(attack.first, attack.second)->isAShip() ? players[PLAYER_A].color : players[PLAYER_B].color;
+				update_board_print(players[(currPlayerInx) % 2].color, attack, hit_color); //update board print			
 				notify_players(currPlayerInx, attack, nullptr, false); //notify players				
 				currPlayerInx = (currPlayerInx + 1) % 2; //nothing happens and the turn passes
 				break;
