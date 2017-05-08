@@ -15,39 +15,33 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="IBattleshipGameAlgo.h">
+    <ClInclude Include="..\Battleship_MAP_player.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BoardClass.h">
+    <ClInclude Include="..\BoardClass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GameFromFileManager.h">
+    <ClInclude Include="..\IBattleshipGameAlgo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Ship.h">
+    <ClInclude Include="..\Ship.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Utils.h">
+    <ClInclude Include="..\Utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="BattleshipGame.cpp">
+    <ClCompile Include="..\Battleship_MAP_player.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BoardClass.cpp">
+    <ClCompile Include="..\BoardClass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GameFromFileManager.cpp">
+    <ClCompile Include="..\Ship.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Ship.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Utils.cpp">
+    <ClCompile Include="..\Utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

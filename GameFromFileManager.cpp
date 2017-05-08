@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "GameFromFileManager.h"
 #include "BattleshipPlayerFromFile.h"
 #include "Ship.h"
@@ -61,69 +60,65 @@ bool GameFromFileManager::initialize_board(string file_board)
 	return true;
 }
 
-string GameFromFileManager::find_attack_path(const string& path_expr_to_find, int player_id)
+
+void GameFromFileManager::free_board(const char** board)
 {
-	WIN32_FIND_DATAA fileData;
-	HANDLE hFind;
-	string first_file, second_file; // lexiogrphic order
-	string retVal = "", tmp_str = "";
-	hFind = FindFirstFileA(path_expr_to_find.c_str(), &fileData);
-	if (hFind == INVALID_HANDLE_VALUE)
+	for (int i = 0; i < brd.getNumOfRows(); i++)
+		delete[] board[i];
+	delete[] board;
+}
+
+bool GameFromFileManager::initialize_player(string dir_path, int player_id)
+{
+	bool retVal = true;
+	string path = dir_path;
+	if (dir_path.compare(".") == 0)
+		path = "Working Directory";
+
+
+	/* find DLLs*/
+	string s_dll = "\\*.dll"; // only .dll endings
+	string dll = Utils::find_file(dir_path + s_dll, player_id);
+	if (dll == FILE_NOT_FOUND)
 	{
-		if (GetLastError() == ERROR_FILE_NOT_FOUND)
-			retVal = FILE_NOT_FOUND;
-		//else
-		//	retVal = ERROR_FINDING_PATH;
+		cout << "Missing an algorithm (dll) file looking in path: " << path << endl;
+		return false;
 	}
 
-	else
+	// Load dynamic library
+	string full_dll_path = dir_path + "\\" + dll;
+	HINSTANCE hDll = LoadLibraryA(full_dll_path.c_str()); // Notice: Unicode compatible version of LoadLibrary
+	if (!hDll)
 	{
-		first_file = fileData.cFileName;
-		second_file = fileData.cFileName;
-		do
-		{
-			tmp_str = fileData.cFileName;
-			if (first_file.compare(tmp_str) > 0)
-			{
-				second_file = first_file;
-				first_file = tmp_str;
-			}
-			else if (second_file.compare(tmp_str) > 0 || first_file.compare(second_file) == 0)
-			{
-				second_file = tmp_str;
-			}
-
-		} while (FindNextFileA(hFind, &fileData));
-		if (player_id == PLAYER_A)
-			retVal = first_file;
-		else
-			retVal = second_file;
-		FindClose(hFind);
+		std::cout << "Cannot load dll: " << full_dll_path <<  std::endl;
+		return false;
 	}
+
+	/* create A instance*/
+	// Get function pointer
+	// define function of the type we expect
+	typedef IBattleshipGameAlgo *(*GetAlgoFunc)();
+	GetAlgoFunc getFunc;
+	getFunc = (GetAlgoFunc)GetProcAddress(hDll, "GetAlgorithm");
+	if (!getFunc)
+	{
+		std::cout << "Cannot load dll: " << full_dll_path << std::endl;
+		return false;
+	}
+	players[player_id].algo = getFunc();
+	const char** board = getBoardOfPlayer(player_id);
+	players[player_id].algo->setBoard(player_id, board, brd.getNumOfRows(), brd.getNumOfCols());
+	retVal &= players[player_id].algo->init(dir_path);
+
+	// cleanup
+	free_board(board);
+
 	return retVal;
 }
 
-bool GameFromFileManager::initialize_players(string file_a, string file_b)
+bool GameFromFileManager::initialize_players(string dir_path)
 {
-	bool retVal = true;
-	const char** boardA = getBoardOfPlayer(PLAYER_A);
-	const char** boardB = getBoardOfPlayer(PLAYER_B);
-	players[PLAYER_A].algo = new BattleshipPlayerFromFile(); //TODO: create dll IAlgo!
-	players[PLAYER_A].algo->setBoard(PLAYER_A, boardA, brd.getNumOfRows(), brd.getNumOfCols()); //TODO: create the board really!
-	retVal &= players[PLAYER_A].algo->init(file_a);
-	players[PLAYER_B].algo = new Battleship_MAP_player();
-	players[PLAYER_B].algo->setBoard(PLAYER_B, boardB, brd.getNumOfRows(), brd.getNumOfCols());
-	retVal &= players[PLAYER_B].algo->init(file_b);
-
-	// cleanup
-	for (int i = 0; i < brd.getNumOfRows(); i++)
-		delete[] boardA[i];
-	delete[] boardA;
-	for (int i = 0; i < brd.getNumOfRows(); i++)
-		delete[] boardB[i];
-	delete[] boardB;
-
-	return retVal;
+	return initialize_player(dir_path, PLAYER_A) and initialize_player(dir_path, PLAYER_B);
 }
 
 
@@ -165,7 +160,7 @@ bool GameFromFileManager::initialize(int argc, char *argv[])
 		file_board = dir_path + "\\" + find_file_ret_val;
 		find_board = true;
 	}	
-	find_file_ret_val = find_attack_path(dir_path + "\\*.attack", PLAYER_A);
+	/*find_file_ret_val = find_attack_path(dir_path + "\\*.attack", PLAYER_A);
 	if (find_file_ret_val != FILE_NOT_FOUND)
 	{
 		file_a = dir_path + "\\" + find_file_ret_val;
@@ -176,58 +171,58 @@ bool GameFromFileManager::initialize(int argc, char *argv[])
 	{
 		file_b = dir_path + "\\" + find_file_ret_val;
 		find_b = true;
-	}			
+	}*/			
 	string path = (argc == 1) ? "Working Directory" : argv[1];
 	if (!find_board)
 		cout << "Missing board file (*.sboard) looking in path: " << path << endl; //ReqPrnt
-	if (!find_a)
-		cout << "Missing attack file for player A (*.attack-a) looking in path: " << path << endl; //ReqPrnt
-	if (!find_b)
-		cout << "Missing attack file for player B (*.attack-b) looking in path: " << path << endl; //ReqPrnt
-	if (find_board && find_a && find_b)
+	//if (!find_a)
+	//	cout << "Missing attack file for player A (*.attack-a) looking in path: " << path << endl; //ReqPrnt
+	//if (!find_b)
+	//	cout << "Missing attack file for player B (*.attack-b) looking in path: " << path << endl; //ReqPrnt
+	if (find_board)
 	{
 		if (initialize_board(file_board) == false)
 			return false;
-		return initialize_players(file_a, file_b);
+		return initialize_players(dir_path);
 	}
 	return false;
 }
 
-bool GameFromFileManager::initialize_file_and_naive(int argc, char *argv[])
-{
-	bool find_board = false, find_a = false, find_b = false;
-	string dir_path = ".", file_board, file_a = "", file_b = "", find_file_ret_val;
-	pair<bool, string> parser_ret_val = parse_command_line_arguments(argc, argv);
-	dir_path = parser_ret_val.second;
-	if (parser_ret_val.first == false)
-		return false;
-	/* find files */
-	find_file_ret_val = Utils::find_path(dir_path + "\\*.sboard");
-	if (find_file_ret_val != FILE_NOT_FOUND)
-	{
-		file_board = dir_path + "\\" + find_file_ret_val;
-		find_board = true;
-	}
-	find_file_ret_val = find_attack_path(dir_path + "\\*.attack", PLAYER_A);
-	if (find_file_ret_val != FILE_NOT_FOUND)
-	{
-		file_a = dir_path + "\\" + find_file_ret_val;
-		find_a = true;
-	}
-	string path = (argc == 1) ? "Working Directory" : argv[1];
-	if (!find_board)
-		cout << "Missing board file (*.sboard) looking in path: " << path << endl; //ReqPrnt
-	if (!find_a)
-		cout << "Missing attack file for player A (*.attack-a) looking in path: " << path << endl; //ReqPrnt
-
-	if (find_board && find_a)
-	{
-		if (initialize_board(file_board) == false)
-			return false;
-		return initialize_players(file_a, file_b);
-	}
-	return false;
-}
+//bool GameFromFileManager::initialize_file_and_naive(int argc, char *argv[])
+//{
+//	bool find_board = false, find_a = false, find_b = false;
+//	string dir_path = ".", file_board, file_a = "", file_b = "", find_file_ret_val;
+//	pair<bool, string> parser_ret_val = parse_command_line_arguments(argc, argv);
+//	dir_path = parser_ret_val.second;
+//	if (parser_ret_val.first == false)
+//		return false;
+//	/* find files */
+//	find_file_ret_val = Utils::find_path(dir_path + "\\*.sboard");
+//	if (find_file_ret_val != FILE_NOT_FOUND)
+//	{
+//		file_board = dir_path + "\\" + find_file_ret_val;
+//		find_board = true;
+//	}
+//	find_file_ret_val = find_attack_path(dir_path + "\\*.attack", PLAYER_A);
+//	if (find_file_ret_val != FILE_NOT_FOUND)
+//	{
+//		file_a = dir_path + "\\" + find_file_ret_val;
+//		find_a = true;
+//	}
+//	string path = (argc == 1) ? "Working Directory" : argv[1];
+//	if (!find_board)
+//		cout << "Missing board file (*.sboard) looking in path: " << path << endl; //ReqPrnt
+//	if (!find_a)
+//		cout << "Missing attack file for player A (*.attack-a) looking in path: " << path << endl; //ReqPrnt
+//
+//	if (find_board && find_a)
+//	{
+//		if (initialize_board(file_board) == false)
+//			return false;
+//		return initialize_players(dir_path);
+//	}
+//	return false;
+//}
 
 
 GameFromFileManager::GameFromFileManager() : currPlayerInx(0),
@@ -576,26 +571,26 @@ void GameFromFileManager::findShips(char user, vector<Ship>& ships)
 
 void GameFromFileManager::printShipsCoordinates(char user)
 {
-	vector<Ship> *ships = user == 'A' ? &players[PLAYER_A].ships : &players[PLAYER_B].ships;
+	/*vector<Ship> *ships = user == 'A' ? &players[PLAYER_A].ships : &players[PLAYER_B].ships;
 	for (unsigned int i = 0; i < ships->size(); i++)
 	{
 		vector<pair<pair<int, int>, bool>> coord = (*ships)[i].getCoordinates();
 		DEBUG("printing coordinated of ship number" << i + 1 << " of " << user);
 		for (unsigned int j = 0; j < coord.size(); j++)
 			DEBUG((((*coord)[j]).first).first << ", " << (((*coord)[j]).first).second);
-	}
+	}*/
 }
 
 // this function works only for 10X10 boards
 // the board that is alocated here should be freed
-const char** GameFromFileManager::getBoardOfPlayer(int player_id)
+const char** GameFromFileManager::getBoardOfPlayer(int player_id) const
 {
-	const int rows = Board::DEFAULT_BOARD_WIDTH;
-	const int cols = Board::DEFAULT_BOARD_WIDTH;
+	const int rows = brd.getNumOfRows();
+	const int cols = brd.getNumOfCols();
 	const char **board = new const char*[rows];
 	for (int row = 0; row < rows; row++)
 	{
-		char *row_chars = new char[10];
+		char *row_chars = new char[rows];
 		for (int col = 0; col < cols; col++)
 		{
 			if ((player_id == PLAYER_A and Board::isBShip(brd(row + 1, col + 1))) or

@@ -18,7 +18,7 @@ public:
 
 	bool init(const std::string& path) override; // returns whether the init succeeded or failed
 
-	bool loadAttacksFromFile();
+	bool BattleshipPlayerFromFile::loadAttacksFromFile(string file);
 
 	/* This function is my API to get my board */
 	void setBoard(int player, const char** board, int numRows, int numCols) override;
@@ -31,6 +31,7 @@ public:
 
 	
 private:
+	int player_id;
 	Board brd;
 	std::queue<std::pair<int,int>> attacksQueue;
 	string pathToAttacksFile;

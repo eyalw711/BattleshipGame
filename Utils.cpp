@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Utils.h"
 #include "GameFromFileManager.h"
 
@@ -97,3 +96,44 @@ string Utils::find_path(const string& path_expr_to_find)
 	return retVal;
 }
 
+string Utils::find_file(const string& path_expr_to_find, int player_id)
+{
+	WIN32_FIND_DATAA fileData;
+	HANDLE hFind;
+	string first_file, second_file; // lexiogrphic order
+	string retVal = "", tmp_str = "";
+	hFind = FindFirstFileA(path_expr_to_find.c_str(), &fileData);
+	if (hFind == INVALID_HANDLE_VALUE)
+	{
+		if (GetLastError() == ERROR_FILE_NOT_FOUND)
+			retVal = FILE_NOT_FOUND;
+		//else
+		//	retVal = ERROR_FINDING_PATH;
+	}
+
+	else
+	{
+		first_file = fileData.cFileName;
+		second_file = fileData.cFileName;
+		do
+		{
+			tmp_str = fileData.cFileName;
+			if (first_file.compare(tmp_str) > 0)
+			{
+				second_file = first_file;
+				first_file = tmp_str;
+			}
+			else if (second_file.compare(tmp_str) > 0 || first_file.compare(second_file) == 0)
+			{
+				second_file = tmp_str;
+			}
+
+		} while (FindNextFileA(hFind, &fileData));
+		if (player_id == PLAYER_A)
+			retVal = first_file;
+		else
+			retVal = second_file;
+		FindClose(hFind);
+	}
+	return retVal;
+}

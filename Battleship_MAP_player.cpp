@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Battleship_MAP_player.h"
 #include <set>
 #include <exception>
@@ -19,6 +18,7 @@ Battleship_MAP_player::Battleship_MAP_player() :
     destroySession(vector<pair<int,int>>()),
     uncompleteHitSpots(HeatMap())
 {
+	DEBUG("@@@@@@@@@@@@@@@@@@@@@@@@@@@ MAP player");
     srand(static_cast<int>(time(nullptr)));
 }
 
@@ -588,3 +588,8 @@ void HeatMap::reveal(const pair<int, int>& crd, vector<pair<int, int>>& revealed
     }
 }
 
+ALGO_API IBattleshipGameAlgo* GetAlgorithm()
+{
+	IBattleshipGameAlgo *algo = new Battleship_MAP_player();
+	return algo;
+}

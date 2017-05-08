@@ -1,10 +1,10 @@
-#include "stdafx.h"
 #include "Ship.h"
 #include <iostream>
 #include <iso646.h>
 #include <set>
 #include <math.h>
 #include "BoardClass.h"
+#include "Utils.h"
 
 Ship::Ship()
 {

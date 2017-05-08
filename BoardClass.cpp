@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "BoardClass.h"
 #include <iostream>
 #include <fstream>

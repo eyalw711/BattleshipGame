@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "BattleshipNaivePlayer.h"
 
 BattleshipNaivePlayer::BattleshipNaivePlayer() : 
@@ -6,6 +5,7 @@ BattleshipNaivePlayer::BattleshipNaivePlayer() :
     ships(vector<Ship>()),
     current_coord(pair<int,int>(1,1))
 {
+	DEBUG("@@@@@@@@@@@@@@@@@@@@@@@@@@@naive player");
 }
 
 BattleshipNaivePlayer::~BattleshipNaivePlayer()
@@ -65,4 +65,11 @@ void BattleshipNaivePlayer::notifyOnAttackResult(int player, int row, int col, A
 {
 	//thank you but I am stupid and don't really care about the results of the attack :)
 	return;
+}
+
+
+ALGO_API IBattleshipGameAlgo* GetAlgorithm()
+{
+	IBattleshipGameAlgo *algo = new BattleshipNaivePlayer();
+	return algo;
 }

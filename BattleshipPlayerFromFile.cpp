@@ -1,9 +1,9 @@
-#include "stdafx.h"
 #include "BattleshipPlayerFromFile.h"
 #include <string>
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include "Utils.h"
 
 using namespace  std;
 
@@ -11,22 +11,30 @@ using namespace  std;
 BattleshipPlayerFromFile::BattleshipPlayerFromFile() : 
 	brd(Board()), attacksQueue(std::queue<std::pair<int, int>>())
 {
+	DEBUG("@@@@@@@@@@@@@@@@@@@@@@@@@@@player from file");
 }
 
-bool BattleshipPlayerFromFile::init(const std::string& path) //TODO: change it according to clarifications in the moodle
+bool BattleshipPlayerFromFile::init(const std::string& path)
 {
-	pathToAttacksFile = path;
-	return loadAttacksFromFile();
+	string find_file_ret_val = Utils::find_file(path + "\\*.attack", player_id);
+	if (find_file_ret_val != FILE_NOT_FOUND)
+	{
+		string file = path + "\\" + find_file_ret_val;
+		return loadAttacksFromFile(file);
+	}
+	return false;
+	
+	
 }
 
 /* returns true for success and false for error */
-bool BattleshipPlayerFromFile::loadAttacksFromFile()
+bool BattleshipPlayerFromFile::loadAttacksFromFile(string file)
 {
 	bool retVal = true;
 
 	//-- open path
 	string line;
-	ifstream attacksFile(pathToAttacksFile);
+	ifstream attacksFile(file);
 	if (attacksFile.is_open())
 	{
 		//read attacks
@@ -166,5 +174,12 @@ void BattleshipPlayerFromFile::setBoard(int player, const char ** board, int num
 	/*as a "BattleshipPlayerFromFile" I'm really stupid and nothing about the
 	 * board interests me other than the numRows and numCols*/
 	brd = Board(numRows, numCols);
+	player_id = player;
 }
 
+
+ALGO_API IBattleshipGameAlgo* GetAlgorithm()
+{
+	IBattleshipGameAlgo *algo = new BattleshipPlayerFromFile();
+	return algo;
+}

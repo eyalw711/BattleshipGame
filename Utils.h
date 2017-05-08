@@ -35,6 +35,7 @@ Intense White    -           15
 
 
 */
+
 //#define DEBUG_BUILD
 
 #ifdef DEBUG_BUILD
@@ -60,6 +61,7 @@ class Utils
 		static void set_quiet(bool is_quiet);
 		static bool get_quiet();
 		static void set_delay(int delay);
+		static string Utils::find_file(const string& path_expr_to_find, int player_id);
 		static const int DEFAULT_PRINT_DELAY = 2000;
 		static const int DEFAULT_START_ANIMATION_DELAY = 350;
 		static const int DEFAULT_END_ANIMATION_DELAY = 500;
@@ -69,6 +71,7 @@ class Utils
 		static const int GREEN_COLOR = 2;
 		static const int PRINT_INDENT = 4;
 		static const char HIT_SIGN = 'X';
+		static const int PLAYER_A = 0;
 
 	private:
 		Utils(){} //dissallow crating instances of this class
