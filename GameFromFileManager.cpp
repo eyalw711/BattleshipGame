@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <iso646.h>
 #include "BattleshipNaivePlayer.h"
+#include "Battleship_MAP_player.h"
 using namespace std;
 
 
@@ -110,7 +111,7 @@ bool GameFromFileManager::initialize_players(string file_a, string file_b)
 	players[PLAYER_A].algo = new BattleshipPlayerFromFile(); //TODO: create dll IAlgo!
 	players[PLAYER_A].algo->setBoard(PLAYER_A, boardA, brd.getNumOfRows(), brd.getNumOfCols()); //TODO: create the board really!
 	retVal &= players[PLAYER_A].algo->init(file_a);
-	players[PLAYER_B].algo = new BattleshipNaivePlayer();
+	players[PLAYER_B].algo = new Battleship_MAP_player();
 	players[PLAYER_B].algo->setBoard(PLAYER_B, boardB, brd.getNumOfRows(), brd.getNumOfCols());
 	retVal &= players[PLAYER_B].algo->init(file_b);
 

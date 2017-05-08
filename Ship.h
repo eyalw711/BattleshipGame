@@ -61,7 +61,7 @@ public:
 
 private:
 	ship_type type;
-	int size;
+	size_t size;
 	//pair<int, int> start;
 	//pair<int, int> end;
 	vector<pair<pair<int, int>,bool>> coordinates; // bool is "isHit" (false if not hit)

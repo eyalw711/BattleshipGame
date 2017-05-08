@@ -17,15 +17,20 @@ public:
     HeatMap& operator=(const HeatMap&);
     int operator()(int, int) const;
     int operator()(pair<int, int> crd) const;
+
     void setCoord(int row, int col, int newVal);
     void setCoord(pair<int, int> crd, int newVal);
     void coordPlusX(int row, int col, int X);
     void coordPlusX(pair<int, int> crd, int X);
 
+    int getNumRows() const;
+    int getNumCols() const;
     //friend std::ostream& operator<<(std::ostream &strm, const HeatMap &brd);
     ~HeatMap();
+    int getMaxHeat() const;
     pair<int,int> getMaxHeatCoord() const;
     pair<int,int> getMaxHeatCoord_destroy() const;
+    void reveal(const pair<int, int>& crd, vector<pair<int, int>>& revealed);
 
 private:
     int rows_;
@@ -62,7 +67,8 @@ private:
     *******************/
 
     bool myShipAt(int row, int col) const;
-
+    bool crdHelpsMeInDestroyMode(pair<int, int>& coord) const;
+    void turn_sunk_ship_to_obstacle(vector<pair<int, int>> sunkShipCoords);
 
     /*******************
     *    Functions     *
@@ -70,19 +76,18 @@ private:
     void notifyAttackMiss(int row, int col);
     void notifyAttackHit(int row, int col);
 
-    bool initDestroyModeRightAfterSink_innerLoop_isChanged();
     void initDestroyModeRightAfterSink();
 
     void notifyAttackSink(int row, int col);
     void notifyOpponentAttackHit(int row, int col);
     void notifyOpponentAttackSink(int row, int col);
 
-    pair<int, int> detectNotifiedSunkShip_innerLoop(bool* is_inner_loop_changed, vector<pair<int,int>>& detected);
-    vector<pair<int,int>> detectNotifiedSunkShip(int row, int col);
-
     void initObstacles();
-    void seekHeat_addHeat_tryShipSizes(HeatMap& seekHeatMap, int i, int j, int orientation) const;
+    void seekHeat_addHeat_tryShipSizes(HeatMap& seekHeatMap, int i, int j) const;
     HeatMap computeSeekHeat() const;
+    pair<int, int> findTopLeftDestroySessionCoord() const;
+    void computeDestroyHeatAllOptions(HeatMap& heat_map, bool isHoriz) const;
+    bool isDestroySessionHorizontal() const;
     HeatMap computeDestroyHeat() const;
 
     int player_;
@@ -93,7 +98,7 @@ private:
     bool isSeek; // true == SeekMode, false == DestroyMode
     //HeatMap heatmap;
     vector<pair<int, int>> destroySession;
-    set<pair<int, int>> uncompleteHitSpots;
+    HeatMap uncompleteHitSpots;
 };
 
 

@@ -158,11 +158,11 @@ bool Ship::isValidShip(const vector<pair<pair<int, int>, bool>>& coordinates, sh
 {
 	int cur_row, cur_col;
 	bool dif_row = false, dif_col = false;
-	int size = coordinates.size();
-	
+	size_t size = coordinates.size();
+
 	int row = Ship::getRow((coordinates)[0]);
 	int col = Ship::getCol((coordinates)[0]);
-	for(int i = 0; i < size; i++)
+	for(size_t i = 0; i < size; i++)
 	{
 		cur_row = Ship::getRow((coordinates)[i]);
 		cur_col = Ship::getCol((coordinates)[i]);
