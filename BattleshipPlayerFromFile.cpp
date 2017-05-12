@@ -16,7 +16,7 @@ BattleshipPlayerFromFile::BattleshipPlayerFromFile() :
 
 bool BattleshipPlayerFromFile::init(const std::string& path)
 {
-	string find_file_ret_val = Utils::find_file(path + "\\*.attack", player_id);
+	string find_file_ret_val = Utils::find_file(path + "\\*.attack", player_id, false);
 	if (find_file_ret_val != FILE_NOT_FOUND)
 	{
 		string file = path + "\\" + find_file_ret_val;

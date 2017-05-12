@@ -78,7 +78,7 @@ bool GameFromFileManager::initialize_player(string dir_path, int player_id)
 
 	/* find DLLs*/
 	string s_dll = "\\*.dll"; // only .dll endings
-	string dll = Utils::find_file(dir_path + s_dll, player_id);
+	string dll = Utils::find_file(dir_path + s_dll, player_id, true);
 	if (dll == FILE_NOT_FOUND)
 	{
 		cout << "Missing an algorithm (dll) file looking in path: " << path << endl;
@@ -86,11 +86,13 @@ bool GameFromFileManager::initialize_player(string dir_path, int player_id)
 	}
 
 	// Load dynamic library
+	char full_path[_MAX_PATH];
 	string full_dll_path = dir_path + "\\" + dll;
-	HINSTANCE hDll = LoadLibraryA(full_dll_path.c_str()); // Notice: Unicode compatible version of LoadLibrary
+	_fullpath(full_path, full_dll_path.c_str(), _MAX_PATH);
+	HINSTANCE hDll = LoadLibraryA(full_path); // Notice: Unicode compatible version of LoadLibrary
 	if (!hDll)
 	{
-		std::cout << "Cannot load dll: " << full_dll_path <<  std::endl;
+		std::cout << "Cannot load dll: " << full_path <<  std::endl;
 		return false;
 	}
 
@@ -102,7 +104,7 @@ bool GameFromFileManager::initialize_player(string dir_path, int player_id)
 	getFunc = (GetAlgoFunc)GetProcAddress(hDll, "GetAlgorithm");
 	if (!getFunc)
 	{
-		std::cout << "Cannot load dll: " << full_dll_path << std::endl;
+		std::cout << "Cannot load dll: " << full_path << std::endl;
 		return false;
 	}
 	players[player_id].algo = getFunc();

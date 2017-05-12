@@ -96,7 +96,7 @@ string Utils::find_path(const string& path_expr_to_find)
 	return retVal;
 }
 
-string Utils::find_file(const string& path_expr_to_find, int player_id)
+string Utils::find_file(const string& path_expr_to_find, int player_id, bool at_least_two)
 {
 	WIN32_FIND_DATAA fileData;
 	HANDLE hFind;
@@ -129,6 +129,8 @@ string Utils::find_file(const string& path_expr_to_find, int player_id)
 			}
 
 		} while (FindNextFileA(hFind, &fileData));
+		if (at_least_two && first_file.compare(second_file) == 0) // make sure there exist at least two different files
+			return FILE_NOT_FOUND;
 		if (player_id == PLAYER_A)
 			retVal = first_file;
 		else

@@ -61,7 +61,7 @@ class Utils
 		static void set_quiet(bool is_quiet);
 		static bool get_quiet();
 		static void set_delay(int delay);
-		static string Utils::find_file(const string& path_expr_to_find, int player_id);
+		static string Utils::find_file(const string& path_expr_to_find, int player_id, bool at_least_two);
 		static const int DEFAULT_PRINT_DELAY = 2000;
 		static const int DEFAULT_START_ANIMATION_DELAY = 350;
 		static const int DEFAULT_END_ANIMATION_DELAY = 500;
