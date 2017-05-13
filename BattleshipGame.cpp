@@ -4,14 +4,14 @@
 #include "IBattleshipGameAlgo.h"
 #include "BattleshipPlayerFromFile.h"
 
-#include "GameFromFileManager.h"
+#include "GameManager.h"
 
 
 /*Main is for running games etc...*/
 int main(int argc, char *argv[])
 {
 
-	GameFromFileManager manager = GameFromFileManager();
+	GameManager manager = GameManager();
 
 	/* The following line does:
 	 *  - finds files

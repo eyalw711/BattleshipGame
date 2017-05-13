@@ -17,8 +17,11 @@ public:
 	~BattleshipPlayerFromFile() override;
 
 	bool init(const std::string& path) override; // returns whether the init succeeded or failed
+    void tryIgnoreCatchWhat(std::stringstream& ss);
+    void ignoreSpaces(std::stringstream& ss);
+    void parseAttacksFile(string line, ifstream& attacksFile);
 
-	bool BattleshipPlayerFromFile::loadAttacksFromFile(string file);
+    bool BattleshipPlayerFromFile::loadAttacksFromFile(string file);
 
 	/* This function is my API to get my board */
 	void setBoard(int player, const char** board, int numRows, int numCols) override;

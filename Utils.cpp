@@ -1,5 +1,5 @@
 #include "Utils.h"
-#include "GameFromFileManager.h"
+#include "GameManager.h"
 
 using namespace std;
 

@@ -1,4 +1,4 @@
-#include "GameFromFileManager.h"
+#include "GameManager.h"
 #include "BattleshipPlayerFromFile.h"
 #include "Ship.h"
 #include <sys/types.h>
@@ -10,14 +10,14 @@ using namespace std;
 
 
 
-GameFromFileManager::GameFromFileManager(GameFromFileManager& other)
+GameManager::GameManager(GameManager& other)
 {
-	DEBUG("Oh no! copy ctor of GameFromFileManager was called!");
+	DEBUG("Oh no! copy ctor of GameManager was called!");
 }
 
-GameFromFileManager& GameFromFileManager::operator=(GameFromFileManager& other)
+GameManager& GameManager::operator=(GameManager& other)
 {
-	DEBUG("Oh no, operator= of GameFromFileManager was used!");
+	DEBUG("Oh no, operator= of GameManager was used!");
 	return other;
 }
 
@@ -30,7 +30,7 @@ bool is_valid_dir_path(const char *pathname)
 	return true;
 }
 
-bool GameFromFileManager::initialize_board(string file_board)
+bool GameManager::initialize_board(string file_board)
 {
 	bool set_boards_sucess = true;
 	// set board using file
@@ -61,14 +61,14 @@ bool GameFromFileManager::initialize_board(string file_board)
 }
 
 
-void GameFromFileManager::free_board(const char** board)
+void GameManager::free_board(const char** board)
 {
 	for (int i = 0; i < brd.getNumOfRows(); i++)
 		delete[] board[i];
 	delete[] board;
 }
 
-bool GameFromFileManager::initialize_player(string dir_path, int player_id)
+bool GameManager::initialize_player(string dir_path, int player_id)
 {
 	bool retVal = true;
 	string path = dir_path;
@@ -118,13 +118,13 @@ bool GameFromFileManager::initialize_player(string dir_path, int player_id)
 	return retVal;
 }
 
-bool GameFromFileManager::initialize_players(string dir_path)
+bool GameManager::initialize_players(string dir_path)
 {
 	return initialize_player(dir_path, PLAYER_A) and initialize_player(dir_path, PLAYER_B);
 }
 
 
-pair<bool, string> GameFromFileManager::parse_command_line_arguments(int argc, char *argv[])
+pair<bool, string> GameManager::parse_command_line_arguments(int argc, char *argv[])
 {
 	string dir_path = ".";
 	/* parsing command line arguments */
@@ -147,7 +147,7 @@ pair<bool, string> GameFromFileManager::parse_command_line_arguments(int argc, c
 	}
 	return make_pair(true, dir_path);
 }
-bool GameFromFileManager::initialize(int argc, char *argv[])
+bool GameManager::initialize(int argc, char *argv[])
 {
 	bool find_board = false, find_a = false, find_b = false;
 	string dir_path = ".", file_board, file_a, file_b, find_file_ret_val;
@@ -190,7 +190,7 @@ bool GameFromFileManager::initialize(int argc, char *argv[])
 	return false;
 }
 
-//bool GameFromFileManager::initialize_file_and_naive(int argc, char *argv[])
+//bool GameManager::initialize_file_and_naive(int argc, char *argv[])
 //{
 //	bool find_board = false, find_a = false, find_b = false;
 //	string dir_path = ".", file_board, file_a = "", file_b = "", find_file_ret_val;
@@ -227,7 +227,7 @@ bool GameFromFileManager::initialize(int argc, char *argv[])
 //}
 
 
-GameFromFileManager::GameFromFileManager() : currPlayerInx(0),
+GameManager::GameManager() : currPlayerInx(0),
 numOfPlayers(number_of_players), brd(Board())
 {
 	PlayerData player1;
@@ -249,7 +249,7 @@ numOfPlayers(number_of_players), brd(Board())
 	players[PLAYER_B] = player2;	
 }
 
-GameFromFileManager::~GameFromFileManager()
+GameManager::~GameManager()
 {
 	for(PlayerData player: players)
 	{
@@ -258,7 +258,7 @@ GameFromFileManager::~GameFromFileManager()
 }
 
 //user should be 'A' or 'B'
-int GameFromFileManager::numOfValidShips(char user) const
+int GameManager::numOfValidShips(char user) const
 {
 	int cnt = 0;
 	const vector<Ship> *ships;
@@ -274,7 +274,7 @@ int GameFromFileManager::numOfValidShips(char user) const
 }
 
 
-void GameFromFileManager::setPlayersBoards()
+void GameManager::setPlayersBoards()
 {
 	/* As a manager of stupid players, I know in advance they don't care about the
 	 * board so I don't make special effort in giving it to them...
@@ -282,7 +282,7 @@ void GameFromFileManager::setPlayersBoards()
 	
 }
 
-bool GameFromFileManager::validate_ships_shape(int player_id) const
+bool GameManager::validate_ships_shape(int player_id) const
 {
 	Ship::ship_type ship_types_A[4] = { Ship::ship_type::A_BOAT, Ship::ship_type::A_SATIL, Ship::ship_type::A_SUBMARINE, Ship::ship_type::A_DESTROYER };
 	Ship::ship_type ship_types_B[4] = { Ship::ship_type::B_BOAT, Ship::ship_type::B_SATIL, Ship::ship_type::B_SUBMARINE, Ship::ship_type::B_DESTROYER };
@@ -312,7 +312,7 @@ bool GameFromFileManager::validate_ships_shape(int player_id) const
 	return is_valid;
 }
 
-bool GameFromFileManager::validate_no_adjacent_ships() const
+bool GameManager::validate_no_adjacent_ships() const
 {
 	vector<Ship> all_ships;
 	all_ships.insert(all_ships.end(), players[PLAYER_A].ships.begin(), players[PLAYER_A].ships.end());
@@ -331,7 +331,7 @@ bool GameFromFileManager::validate_no_adjacent_ships() const
 	}
 	return true;
 }
-bool GameFromFileManager::isValidBoard() const
+bool GameManager::isValidBoard() const
 {
 	// validate shape of ships
 	bool is_valid = validate_ships_shape(PLAYER_A) && validate_ships_shape(PLAYER_B);
@@ -370,7 +370,7 @@ bool GameFromFileManager::isValidBoard() const
 }
 
 
-bool GameFromFileManager::isGameOn(bool *outOfAttacks) const
+bool GameManager::isGameOn(bool *outOfAttacks) const
 {
 	if (outOfAttacks[0] && outOfAttacks[1])
 		return false;
@@ -381,7 +381,7 @@ bool GameFromFileManager::isGameOn(bool *outOfAttacks) const
 	return true;
 }
 
-bool GameFromFileManager::allSunk(const vector<Ship>& ships)
+bool GameManager::allSunk(const vector<Ship>& ships)
 {
 	for (vector<Ship>::const_iterator it = ships.begin(); it != ships.end(); ++it)
 	{
@@ -391,7 +391,7 @@ bool GameFromFileManager::allSunk(const vector<Ship>& ships)
 	return true;
 }
 
-void GameFromFileManager::update_board_print(int player_color, pair<int, int> attack, int hit_color)
+void GameManager::update_board_print(int player_color, pair<int, int> attack, int hit_color)
 {
 	Board& board = brd;
 	COORD hit_coord;
@@ -403,7 +403,7 @@ void GameFromFileManager::update_board_print(int player_color, pair<int, int> at
 		Utils::updateBoardPrint(player_color, hit_coord, Utils::HIT_SIGN, hit_color);
 }
 
-void GameFromFileManager::notify_players(int currPlayerInx, pair<int, int> attack, const Ship *shipPtr, bool is_hit) const
+void GameManager::notify_players(int currPlayerInx, pair<int, int> attack, const Ship *shipPtr, bool is_hit) const
 {
 	if(is_hit)
 	{
@@ -421,7 +421,7 @@ void GameFromFileManager::notify_players(int currPlayerInx, pair<int, int> attac
 	}
 }
 
-void GameFromFileManager::mainLoopEndOfGamePrint() const
+void GameManager::mainLoopEndOfGamePrint() const
 {
 	if (allSunk(players[PLAYER_A].ships))
 		cout << "Player B won" << endl; //Requirement print
@@ -431,7 +431,7 @@ void GameFromFileManager::mainLoopEndOfGamePrint() const
 	cout << "Player A: " << players[PLAYER_A].score << endl; //Requirement print
 	cout << "Player B: " << players[PLAYER_B].score << endl; //Requirement print
 }
-void GameFromFileManager::make_hit(int currPlayerInx, pair<int, int> attack, bool is_self_hit)
+void GameManager::make_hit(int currPlayerInx, pair<int, int> attack, bool is_self_hit)
 {
 	Ship *shipPtr = getShipAtCrd(attack.first, attack.second); //player hits itself
 	shipPtr->hitAt(attack.first, attack.second);
@@ -446,7 +446,7 @@ void GameFromFileManager::make_hit(int currPlayerInx, pair<int, int> attack, boo
 	notify_players(currPlayerInx, attack, shipPtr);	// notify players			
 }
 
-void GameFromFileManager::mainLoop()
+void GameManager::mainLoop()
 {
 	Board& board = brd;
 	bool OutOfAttacks[2] = { false, false };
@@ -491,12 +491,12 @@ void GameFromFileManager::mainLoop()
 	mainLoopEndOfGamePrint();
 }
 
-int GameFromFileManager::getNumOfPlayers() const
+int GameManager::getNumOfPlayers() const
 {
 	return numOfPlayers;
 }
 
-bool GameFromFileManager::selfHit(PlayerData& player, std::pair<int, int> attack)
+bool GameManager::selfHit(PlayerData& player, std::pair<int, int> attack)
 {
 	Board& board = brd;
 	Ship *shipPtr = this->getShipAtCrd(attack.first, attack.second);
@@ -511,7 +511,7 @@ bool GameFromFileManager::selfHit(PlayerData& player, std::pair<int, int> attack
 	return false;
 }
 
-Ship *GameFromFileManager::getShipAtCrd(int row, int col)
+Ship *GameManager::getShipAtCrd(int row, int col)
 {
 	Board& board = brd;
 	vector<Ship> *ships;
@@ -531,7 +531,7 @@ Ship *GameFromFileManager::getShipAtCrd(int row, int col)
 	return nullptr;
 }
 
-/*void GameFromFileManager::revealSurroundings(int row, int col, char ship_char, Board &board, vector<pair<int, int>> &coords)
+/*void GameManager::revealSurroundings(int row, int col, char ship_char, Board &board, vector<pair<int, int>> &coords)
 {
 	if (board(row, col) == ship_char)
 	{
@@ -550,7 +550,7 @@ Ship *GameFromFileManager::getShipAtCrd(int row, int col)
 }
 
 //user should be 'A' or 'B'
-void GameFromFileManager::findShips(char user, vector<Ship>& ships)
+void GameManager::findShips(char user, vector<Ship>& ships)
 {
 	Board copiedBoard(brd);
 	for (int i = 1; i <= copiedBoard.getNumOfRows(); i++)
@@ -571,7 +571,7 @@ void GameFromFileManager::findShips(char user, vector<Ship>& ships)
 }*/
 
 
-void GameFromFileManager::printShipsCoordinates(char user)
+void GameManager::printShipsCoordinates(char user)
 {
 	/*vector<Ship> *ships = user == 'A' ? &players[PLAYER_A].ships : &players[PLAYER_B].ships;
 	for (unsigned int i = 0; i < ships->size(); i++)
@@ -585,7 +585,7 @@ void GameFromFileManager::printShipsCoordinates(char user)
 
 // this function works only for 10X10 boards
 // the board that is alocated here should be freed
-const char** GameFromFileManager::getBoardOfPlayer(int player_id) const
+const char** GameManager::getBoardOfPlayer(int player_id) const
 {
 	const int rows = brd.getNumOfRows();
 	const int cols = brd.getNumOfCols();
