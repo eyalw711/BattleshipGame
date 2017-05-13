@@ -168,7 +168,16 @@ bool GameManager::initialize(int argc, char *argv[])
 	bool find_board = false, find_a = false, find_b = false, is_working_dir = false, find_path = true;
 	string dir_path = ".", file_board, file_a, file_b, find_file_ret_val;
 	pair<bool, string> parser_ret_val = parse_command_line_arguments(argc, argv, is_working_dir);
+	char cCurrentPath[FILENAME_MAX];
+	if (!_getcwd(cCurrentPath, sizeof(cCurrentPath)))
+	{
+		cout << "Error: can't extract current directory path" << endl;
+		return false;
+
+	}
+	cCurrentPath[sizeof(cCurrentPath) - 1] = '\0'; /* not really required */
 	dir_path = parser_ret_val.second;
+	dir_path = is_working_dir ? string(cCurrentPath) : string(argv[1]);
 	if (parser_ret_val.first == false)
 		return false;
 	/* find files */
@@ -178,20 +187,10 @@ bool GameManager::initialize(int argc, char *argv[])
 		file_board = dir_path + "\\" + find_file_ret_val;
 		find_board = true;
 	}
-	char cCurrentPath[FILENAME_MAX];
 
-	if (!_getcwd(cCurrentPath, sizeof(cCurrentPath)))
-	{
-		cout << "Error: can't extract current directory path" << endl;
-		return false;
-
-	}
-
-	cCurrentPath[sizeof(cCurrentPath) - 1] = '\0'; /* not really required */
-	string path = is_working_dir ? string(cCurrentPath) : argv[1];
 	if (!find_board)
 	{
-		cout << "Missing board file (*.sboard) looking in path: " << path << endl; //ReqPrnt
+		cout << "Missing board file (*.sboard) looking in path: " << dir_path << endl; //ReqPrnt
 		string dummy_str;
 		/* even if dll is missing for both players an error message will be printed only once, intentionally*/
 		find_dll(dir_path, PLAYER_A, dummy_str);
