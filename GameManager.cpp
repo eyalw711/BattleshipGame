@@ -1,9 +1,8 @@
 #include "GameManager.h"
 #include "BattleshipPlayerFromFile.h"
 #include "Ship.h"
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <iso646.h>
+#include <direct.h>
 #include "BattleshipNaivePlayer.h"
 #include "Battleship_MAP_player.h"
 using namespace std;
@@ -21,18 +20,12 @@ GameManager& GameManager::operator=(GameManager& other)
 	return other;
 }
 
-bool is_valid_dir_path(const char *pathname)
-{
-	struct stat info;
-
-	if ((stat(pathname, &info) != 0) || !(info.st_mode & S_IFDIR))
-		return false;
-	return true;
-}
 
 bool GameManager::initialize_board(string file_board)
 {
 	bool set_boards_sucess = true;
+	//clear terminal
+	system("cls");
 	// set board using file
 	set_boards_sucess = brd.SetBoardFromFile((file_board).c_str());
 	if (!set_boards_sucess)
@@ -61,29 +54,38 @@ bool GameManager::initialize_board(string file_board)
 }
 
 
-void GameManager::free_board(const char** board)
+void GameManager::free_board(const char** board) const
 {
 	for (int i = 0; i < brd.getNumOfRows(); i++)
 		delete[] board[i];
 	delete[] board;
 }
 
-bool GameManager::initialize_player(string dir_path, int player_id)
+bool GameManager::find_dll(string dir_path, int player_id, string& dll)
 {
-	bool retVal = true;
 	string path = dir_path;
 	if (dir_path.compare(".") == 0)
 		path = "Working Directory";
-
-
-	/* find DLLs*/
 	string s_dll = "\\*.dll"; // only .dll endings
-	string dll = Utils::find_file(dir_path + s_dll, player_id, true);
-	if (dll == FILE_NOT_FOUND)
+	bool file_found = true;
+	dll = Utils::find_file(dir_path + s_dll, player_id, true, file_found);
+	if (!file_found)
 	{
 		cout << "Missing an algorithm (dll) file looking in path: " << path << endl;
 		return false;
 	}
+	return true;
+}
+
+bool GameManager::initialize_player(string dir_path, int player_id)
+{
+
+	string dll;
+
+	/* find DLLs*/
+	bool retVal = find_dll(dir_path, player_id, dll);
+	if (!retVal)
+		return false;
 
 	// Load dynamic library
 	char full_path[_MAX_PATH];
@@ -111,6 +113,11 @@ bool GameManager::initialize_player(string dir_path, int player_id)
 	const char** board = getBoardOfPlayer(player_id);
 	players[player_id].algo->setBoard(player_id, board, brd.getNumOfRows(), brd.getNumOfCols());
 	retVal &= players[player_id].algo->init(dir_path);
+	if (!retVal)
+	{
+		std::cout << "Algorithm initialization failed for dll: " << full_path << std::endl;
+		return false;
+	}
 
 	// cleanup
 	free_board(board);
@@ -124,21 +131,30 @@ bool GameManager::initialize_players(string dir_path)
 }
 
 
-pair<bool, string> GameManager::parse_command_line_arguments(int argc, char *argv[])
+pair<bool, string> GameManager::parse_command_line_arguments(int argc, char *argv[], bool& is_working_dir)
 {
 	string dir_path = ".";
+	is_working_dir = (argc == 1);
 	/* parsing command line arguments */
-	for (int i = 0; i < argc; i++)
+	for (int i = 1; i < argc; i++)
 	{
 		string argument = argv[i];
 		if (argument == "-quiet")
+		{
 			Utils::set_quiet(true);
+			if (i == 1)
+				is_working_dir = true;
+		}
 		if (argument == "-delay")
+		{
 			Utils::set_delay(atoi(argv[i + 1]));
+			if (i == 1)
+				is_working_dir = true;
+		}
 	}
-	if (argc >= 2)
+	if (!is_working_dir)
 	{
-		if (!is_valid_dir_path(argv[1]))
+		if (!Utils::is_valid_dir_path(argv[1]))
 		{
 			cout << "Wrong path: " << argv[1] << endl; //ReqPrnt
 			return make_pair(false, dir_path);
@@ -149,39 +165,38 @@ pair<bool, string> GameManager::parse_command_line_arguments(int argc, char *arg
 }
 bool GameManager::initialize(int argc, char *argv[])
 {
-	bool find_board = false, find_a = false, find_b = false;
+	bool find_board = false, find_a = false, find_b = false, is_working_dir = false, find_path = true;
 	string dir_path = ".", file_board, file_a, file_b, find_file_ret_val;
-	pair<bool, string> parser_ret_val = parse_command_line_arguments(argc, argv);
+	pair<bool, string> parser_ret_val = parse_command_line_arguments(argc, argv, is_working_dir);
 	dir_path = parser_ret_val.second;
 	if (parser_ret_val.first == false)
 		return false;
 	/* find files */
-	find_file_ret_val = Utils::find_path(dir_path + "\\*.sboard");
-	if (find_file_ret_val != FILE_NOT_FOUND)
+	find_file_ret_val = Utils::find_path(dir_path + "\\*.sboard", find_path);
+	if (find_path)
 	{
 		file_board = dir_path + "\\" + find_file_ret_val;
 		find_board = true;
-	}	
-	/*find_file_ret_val = find_attack_path(dir_path + "\\*.attack", PLAYER_A);
-	if (find_file_ret_val != FILE_NOT_FOUND)
-	{
-		file_a = dir_path + "\\" + find_file_ret_val;
-		find_a = true;
 	}
-	find_file_ret_val = find_attack_path(dir_path + "\\*.attack", PLAYER_B);
-	if (find_file_ret_val != FILE_NOT_FOUND)
+	char cCurrentPath[FILENAME_MAX];
+
+	if (!_getcwd(cCurrentPath, sizeof(cCurrentPath)))
 	{
-		file_b = dir_path + "\\" + find_file_ret_val;
-		find_b = true;
-	}*/			
-	string path = (argc == 1) ? "Working Directory" : argv[1];
+		cout << "Error: can't extract current directory path" << endl;
+		return false;
+
+	}
+
+	cCurrentPath[sizeof(cCurrentPath) - 1] = '\0'; /* not really required */
+	string path = is_working_dir ? string(cCurrentPath) : argv[1];
 	if (!find_board)
+	{
 		cout << "Missing board file (*.sboard) looking in path: " << path << endl; //ReqPrnt
-	//if (!find_a)
-	//	cout << "Missing attack file for player A (*.attack-a) looking in path: " << path << endl; //ReqPrnt
-	//if (!find_b)
-	//	cout << "Missing attack file for player B (*.attack-b) looking in path: " << path << endl; //ReqPrnt
-	if (find_board)
+		string dummy_str;
+		/* even if dll is missing for both players an error message will be printed only once, intentionally*/
+		find_dll(dir_path, PLAYER_A, dummy_str);
+	}
+	else
 	{
 		if (initialize_board(file_board) == false)
 			return false;
@@ -189,42 +204,6 @@ bool GameManager::initialize(int argc, char *argv[])
 	}
 	return false;
 }
-
-//bool GameManager::initialize_file_and_naive(int argc, char *argv[])
-//{
-//	bool find_board = false, find_a = false, find_b = false;
-//	string dir_path = ".", file_board, file_a = "", file_b = "", find_file_ret_val;
-//	pair<bool, string> parser_ret_val = parse_command_line_arguments(argc, argv);
-//	dir_path = parser_ret_val.second;
-//	if (parser_ret_val.first == false)
-//		return false;
-//	/* find files */
-//	find_file_ret_val = Utils::find_path(dir_path + "\\*.sboard");
-//	if (find_file_ret_val != FILE_NOT_FOUND)
-//	{
-//		file_board = dir_path + "\\" + find_file_ret_val;
-//		find_board = true;
-//	}
-//	find_file_ret_val = find_attack_path(dir_path + "\\*.attack", PLAYER_A);
-//	if (find_file_ret_val != FILE_NOT_FOUND)
-//	{
-//		file_a = dir_path + "\\" + find_file_ret_val;
-//		find_a = true;
-//	}
-//	string path = (argc == 1) ? "Working Directory" : argv[1];
-//	if (!find_board)
-//		cout << "Missing board file (*.sboard) looking in path: " << path << endl; //ReqPrnt
-//	if (!find_a)
-//		cout << "Missing attack file for player A (*.attack-a) looking in path: " << path << endl; //ReqPrnt
-//
-//	if (find_board && find_a)
-//	{
-//		if (initialize_board(file_board) == false)
-//			return false;
-//		return initialize_players(dir_path);
-//	}
-//	return false;
-//}
 
 
 GameManager::GameManager() : currPlayerInx(0),

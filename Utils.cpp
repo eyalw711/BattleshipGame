@@ -3,6 +3,7 @@
 
 using namespace std;
 
+//const string Utils::FILE_NOT_FOUND = "file not found";
 bool Utils::QUIET = false;
 int Utils::MILISECONDS_PRINT_DELAY = Utils::DEFAULT_PRINT_DELAY;;
 
@@ -74,16 +75,17 @@ void Utils::set_delay(int delay)
 	Utils::MILISECONDS_PRINT_DELAY = delay;
 }
 
-string Utils::find_path(const string& path_expr_to_find)
+string Utils::find_path(const string& path_expr_to_find, bool& find_file)
 {
 	WIN32_FIND_DATAA fileData;
 	HANDLE hFind;
 	string retVal = "";
+	find_file = true;
 	hFind = FindFirstFileA(path_expr_to_find.c_str(), &fileData);
 	if (hFind == INVALID_HANDLE_VALUE)
 	{
 		if (GetLastError() == ERROR_FILE_NOT_FOUND)
-			retVal = FILE_NOT_FOUND;
+			find_file = false;
 		//else
 	    //	retVal = ERROR_FINDING_PATH;
 	}
@@ -96,17 +98,18 @@ string Utils::find_path(const string& path_expr_to_find)
 	return retVal;
 }
 
-string Utils::find_file(const string& path_expr_to_find, int player_id, bool at_least_two)
+string Utils::find_file(const string& path_expr_to_find, int player_id, bool at_least_two, bool& file_found)
 {
 	WIN32_FIND_DATAA fileData;
 	HANDLE hFind;
 	string first_file, second_file; // lexiogrphic order
 	string retVal = "", tmp_str = "";
+	file_found = true;
 	hFind = FindFirstFileA(path_expr_to_find.c_str(), &fileData);
 	if (hFind == INVALID_HANDLE_VALUE)
 	{
 		if (GetLastError() == ERROR_FILE_NOT_FOUND)
-			retVal = FILE_NOT_FOUND;
+			file_found = false;
 		//else
 		//	retVal = ERROR_FINDING_PATH;
 	}
@@ -130,7 +133,7 @@ string Utils::find_file(const string& path_expr_to_find, int player_id, bool at_
 
 		} while (FindNextFileA(hFind, &fileData));
 		if (at_least_two && first_file.compare(second_file) == 0) // make sure there exist at least two different files
-			return FILE_NOT_FOUND;
+			file_found = false;
 		if (player_id == PLAYER_A)
 			retVal = first_file;
 		else
@@ -138,4 +141,13 @@ string Utils::find_file(const string& path_expr_to_find, int player_id, bool at_
 		FindClose(hFind);
 	}
 	return retVal;
+}
+
+bool Utils::is_valid_dir_path(const char *pathname)
+{
+	struct stat info;
+
+	if ((stat(pathname, &info) != 0) || !(info.st_mode & S_IFDIR))
+		return false;
+	return true;
 }

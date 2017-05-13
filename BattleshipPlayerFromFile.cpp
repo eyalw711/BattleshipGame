@@ -16,8 +16,9 @@ BattleshipPlayerFromFile::BattleshipPlayerFromFile() :
 
 bool BattleshipPlayerFromFile::init(const std::string& path)
 {
-	string find_file_ret_val = Utils::find_file(path + "\\*.attack", player_id, false);
-	if (find_file_ret_val != FILE_NOT_FOUND)
+	bool find_file = true;
+	string find_file_ret_val = Utils::find_file(path + "\\*.attack", player_id, false, find_file);
+	if (find_file)
 	{
 		string file = path + "\\" + find_file_ret_val;
 		return loadAttacksFromFile(file);
@@ -85,7 +86,7 @@ void BattleshipPlayerFromFile::parseAttacksFile(string line, ifstream& attacksFi
                 stage7_cont = true;
             }
         }
-        if (!stage7_cont) continue;
+        if (stage7_cont) continue;
         if (row < 1 || row > brd.getNumOfRows() || col < 1 ||  col > brd.getNumOfCols()) { //--stage8: check coords validity
             DEBUG_THEN_CONTINUE("Coordinates are invalid to board!");
         }

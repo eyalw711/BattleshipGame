@@ -7,6 +7,9 @@
 #include <stdio.h>
 #include <tchar.h>
 #include <iostream>
+#include <direct.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <fstream>
 #include <sstream>
 
@@ -46,8 +49,8 @@ Intense White    -           15
 
 using namespace std;
 
-const string FILE_NOT_FOUND = "file not found";
-const string ERROR_FINDING_PATH = "error finding path";
+
+//const string ERROR_FINDING_PATH = "error finding path";
 
 class Utils
 {
@@ -55,13 +58,14 @@ class Utils
 		static void gotoxy(int x, int y);
 		static void setcolor(WORD color);
 		static void setForeGroundColor(int ForeGroundColor);
+		static bool Utils::is_valid_dir_path(const char *pathname);
 		static COORD GetConsoleCursorPosition(HANDLE hConsoleOutput);
 		static void Utils::updateBoardPrint(int player_color, COORD hit_coord, char current, int hit_color);
-		static string find_path(const string& path_expr_to_find);
+		static string find_path(const string& path_expr_to_find, bool& find_file);
 		static void set_quiet(bool is_quiet);
 		static bool get_quiet();
 		static void set_delay(int delay);
-		static string Utils::find_file(const string& path_expr_to_find, int player_id, bool at_least_two);
+		static string Utils::find_file(const string& path_expr_to_find, int player_id, bool at_least_two, bool& file_found);
 		static const int DEFAULT_PRINT_DELAY = 2000;
 		static const int DEFAULT_START_ANIMATION_DELAY = 350;
 		static const int DEFAULT_END_ANIMATION_DELAY = 500;
@@ -72,6 +76,7 @@ class Utils
 		static const int PRINT_INDENT = 4;
 		static const char HIT_SIGN = 'X';
 		static const int PLAYER_A = 0;
+		//static const string  FILE_NOT_FOUND;
 
 	private:
 		Utils(){} //dissallow crating instances of this class

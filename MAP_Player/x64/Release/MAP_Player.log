@@ -1,0 +1,12 @@
+﻿  Battleship_MAP_player.cpp
+  BoardClass.cpp
+  Ship.cpp
+  Utils.cpp
+     Creating library C:\GIT\BattleshipGame\x64\Release\MAP_Player.lib and object C:\GIT\BattleshipGame\x64\Release\MAP_Player.exp
+  Generating code
+  59 of 667 functions ( 8.8%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    22 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  MAP_Player.vcxproj -> C:\GIT\BattleshipGame\x64\Release\MAP_Player.dll
+  MAP_Player.vcxproj -> C:\GIT\BattleshipGame\x64\Release\MAP_Player.pdb (Full PDB)

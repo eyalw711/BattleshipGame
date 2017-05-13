@@ -11,7 +11,7 @@
 int main(int argc, char *argv[])
 {
 
-	GameManager manager = GameManager();
+	GameManager *manager = new GameManager();
 
 	/* The following line does:
 	 *  - finds files
@@ -19,13 +19,14 @@ int main(int argc, char *argv[])
 	 *  - manager finds the players' ships
 	 *  - manager initializes players
 	 */
-	bool success = manager.initialize(argc, argv);
+	bool success = manager->initialize(argc, argv);
 	if (!success)
 		return -1;
 
-	manager.setPlayersBoards();
+	manager->setPlayersBoards();
 
-	manager.mainLoop();
+	manager->mainLoop();
+	delete manager;
 
 	return 0;
 }

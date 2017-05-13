@@ -45,9 +45,10 @@ public:
 	void setPlayersBoards();
 
 	//-- utils
+	static bool GameManager::find_dll(string dir_path, int player_id, string& dll);
 	const char** GameManager::getBoardOfPlayer(int player_id) const;
 	bool GameManager::initialize_board(string file_board);
-	void GameManager::free_board(const char** board);
+	void GameManager::free_board(const char** board) const;
 	bool initialize_player(string dir_path, int player_id);
 	bool GameManager::initialize_players(string dir_path);
 	bool GameManager::validate_ships_shape(int player_id) const;
@@ -57,7 +58,7 @@ public:
 	void printShipsCoordinates(char user);
 	static bool allSunk(const vector<Ship>& ships);
 	void GameManager::update_board_print(int player_color, pair<int, int> attack, int hit_color);
-	pair<bool, string> GameManager::parse_command_line_arguments(int argc, char *argv[]);
+	pair<bool, string> GameManager::parse_command_line_arguments(int argc, char *argv[], bool& is_working_dir);
 	static const int number_of_players = 2;
 	static const int PLAYER_A = 0;
 	static const int PLAYER_B = 1;
