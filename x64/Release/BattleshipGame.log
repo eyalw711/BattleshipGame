@@ -1,8 +1,12 @@
-﻿  GameManager.cpp
+﻿  BattleshipGame.cpp
+  BoardClass.cpp
+  GameManager.cpp
+  Ship.cpp
+  Utils.cpp
   Generating code
-  2 of 659 functions ( 0.3%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    0 functions had inline decision re-evaluated but remain unchanged
+  3 of 660 functions ( 0.5%) were compiled, the rest were copied from previous compilation.
+    1 functions were new in current compilation
+    25 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   BattleshipGame.vcxproj -> C:\GIT\BattleshipGame\x64\Release\BattleshipGame.exe
   BattleshipGame.vcxproj -> C:\GIT\BattleshipGame\x64\Release\BattleshipGame.pdb (Full PDB)
