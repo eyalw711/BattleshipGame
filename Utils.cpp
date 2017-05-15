@@ -5,7 +5,7 @@ using namespace std;
 
 //const string Utils::FILE_NOT_FOUND = "file not found";
 bool Utils::QUIET = false;
-int Utils::MILISECONDS_PRINT_DELAY = Utils::DEFAULT_PRINT_DELAY;;
+int Utils::MILISECONDS_PRINT_DELAY = Utils::DEFAULT_PRINT_DELAY;
 
 void Utils::gotoxy(int x, int y)
 {
