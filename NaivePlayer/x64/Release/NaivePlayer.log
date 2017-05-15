@@ -4,9 +4,9 @@
   Utils.cpp
      Creating library C:\GIT\BattleshipGame\x64\Release\NaivePlayer.lib and object C:\GIT\BattleshipGame\x64\Release\NaivePlayer.exp
   Generating code
-  61 of 427 functions (14.3%) were compiled, the rest were copied from previous compilation.
+  0 of 427 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    29 functions had inline decision re-evaluated but remain unchanged
+    14 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   NaivePlayer.vcxproj -> C:\GIT\BattleshipGame\x64\Release\NaivePlayer.dll
   NaivePlayer.vcxproj -> C:\GIT\BattleshipGame\x64\Release\NaivePlayer.pdb (Full PDB)

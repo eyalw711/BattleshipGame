@@ -4,9 +4,9 @@
   Utils.cpp
      Creating library C:\GIT\BattleshipGame\x64\Release\FromFilePlayer.lib and object C:\GIT\BattleshipGame\x64\Release\FromFilePlayer.exp
   Generating code
-  16 of 349 functions ( 4.6%) were compiled, the rest were copied from previous compilation.
-    1 functions were new in current compilation
-    35 functions had inline decision re-evaluated but remain unchanged
+  0 of 349 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    24 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   FromFilePlayer.vcxproj -> C:\GIT\BattleshipGame\x64\Release\FromFilePlayer.dll
   FromFilePlayer.vcxproj -> C:\GIT\BattleshipGame\x64\Release\FromFilePlayer.pdb (Full PDB)

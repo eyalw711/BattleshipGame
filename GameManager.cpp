@@ -426,6 +426,7 @@ void GameManager::make_hit(int currPlayerInx, pair<int, int> attack, bool is_sel
 
 void GameManager::mainLoop()
 {
+	Utils::ShowConsoleCursor(false);
 	Board& board = brd;
 	bool OutOfAttacks[2] = { false, false };
 	while (isGameOn(OutOfAttacks))
@@ -466,6 +467,7 @@ void GameManager::mainLoop()
 			}
 		} while (true);
 	}
+	Utils::ShowConsoleCursor(true);
 	mainLoopEndOfGamePrint();
 }
 
